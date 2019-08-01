@@ -14,14 +14,22 @@ void SimpleMenu::ShowMsg(String message){
   display->display();
 }
 
-void SimpleMenu::SetTitle(String title){
-  
+void SimpleMenu::SetData(char* data){
+  DynamicJsonDocument doc(jsonCapacity);
+  deserializeJson(doc, data);
+  jsonRoot = doc.as<JsonObject>();
+
+  String d = doc[1]["label"];
+
+  display->clearDisplay();
+  display->setCursor(0,0);
+  display->println("INFO:"); 
+  display->println(d);  
 }
 
-void SimpleMenu::SetData(String data){
-  
-}
-
+/*char* SimpleMenu::GetData(){
+  return data;
+}*/
 
 /*void ShowMenu(String MenuArray[],int MenuSize){
   display.clearDisplay();
@@ -61,11 +69,17 @@ void SimpleMenu::SetData(String data){
   display.display();
 }*/
 
-String SimpleMenu::GetData(){
-  return "StringWithNothingData";
+void SimpleMenu::Redraw(){
+  _ShowList();
 }
 
-void SimpleMenu::Redraw(){
+void SimpleMenu::_ShowList(){
+  for(int i=0;i < maxLines;i++){
+    //display->println(jsonRoot[i]["label"]);  
+  }  
+}
+
+void SimpleMenu::_SetTitle(String title){
   
 }
 

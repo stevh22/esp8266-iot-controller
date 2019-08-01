@@ -33,8 +33,8 @@ String MAIN_MENU[MAIN_MENU_SIZE] = {"Lichtmodi:","Funken","Weiss","Rainbow"};
 //================================================================
 //   Global Variables
 //================================================================
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-SimpleMenu menu(display);
+Adafruit_SSD1306 m_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+SimpleMenu menu(m_display);
 
 int CURSOR_POS = 1;
 int MENU_SIZE = 0;
@@ -47,9 +47,9 @@ volatile unsigned long ButtonStateTime = 0;
 
 void setup() {
   // init OLED-Display
-  display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDR); 
-  display.clearDisplay();
-  display.display();
+  m_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDR); 
+  m_display.clearDisplay();
+  m_display.display();
 
   // for Buttons
   pinMode(KEY_BUTTON, INPUT_PULLUP);
@@ -61,21 +61,24 @@ void setup() {
   // connect to Wlan
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pwd);
+  
+  char* json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
+  menu.SetData(json);
+  //menu.Redraw();
 }
-
 //================================================================
 //   Loop-Code
 //================================================================
 
 void loop() {
-  if(WiFi.status() != WL_CONNECTED){
+  /*if(WiFi.status() != WL_CONNECTED){
     //ShowNoWlan();
     //ShowEntryInfo(String("Test"),String("Testmsg..\n1234..."));
     menu.ShowMsg("Nicht\nVerbunden");
   }else{
     //ShowMenu(MAIN_MENU,MAIN_MENU_SIZE);
     menu.ShowMsg("Verbunden");
-  }
+  }//*/
   delay(100);
 }
 
@@ -104,5 +107,5 @@ void DoAction(int ActionID){
   // start connection and send HTTP header
   int httpCode = http.GET();
   http.end();
-}
+}*/
 
