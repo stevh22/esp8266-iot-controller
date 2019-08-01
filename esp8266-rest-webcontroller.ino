@@ -1,9 +1,6 @@
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
+
 #include "SimpleMenu.h"
 
 //================================================================
@@ -23,11 +20,10 @@
 //================================================================
 //   Parameter
 //================================================================
-#define TITLE_COLOR WHITE
-#define TEXT_COLOR  WHITE
 #define OLED_RESET LED_BUILTIN  // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_WIDTH 128        // OLED display width, in pixels
 #define SCREEN_HEIGHT 64        // OLED display height, in pixels
+#define SCREEN_ADDR 0x3C        // OLED i2c-Adresse
 
 #define KEY_BUTTON D3
 #define MENU_FONT_SIZE 2
@@ -37,12 +33,8 @@ String MAIN_MENU[MAIN_MENU_SIZE] = {"Lichtmodi:","Funken","Weiss","Rainbow"};
 //================================================================
 //   Global Variables
 //================================================================
-
-//Adafruit_SSD1306 display(OLED_RESET);
-//#if (SSD1306_LCDHEIGHT != 64)
-//#error("Height incorrect, please fix Adafruit_SSD1306.h!");
-//#endif
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+SimpleMenu menu(display);
 
 int CURSOR_POS = 1;
 int MENU_SIZE = 0;
@@ -54,14 +46,17 @@ volatile unsigned long ButtonStateTime = 0;
 //================================================================
 
 void setup() {
-  // for OLED-Display
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); 
+  // init OLED-Display
+  display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDR); 
   display.clearDisplay();
   display.display();
 
   // for Buttons
   pinMode(KEY_BUTTON, INPUT_PULLUP);
-  attachInterrupt(KEY_BUTTON, ButtonPress, FALLING);
+  //attachInterrupt(KEY_BUTTON, ButtonPress, FALLING);
+
+  // start Menu
+  menu.SetMsg("Suche Wlan");
 
   // connect to Wlan
   WiFi.mode(WIFI_STA);
@@ -74,10 +69,12 @@ void setup() {
 
 void loop() {
   if(WiFi.status() != WL_CONNECTED){
-    ShowNoWlan();
-    ShowEntryInfo(String("Test"),String("Testmsg..\n1234..."));
+    //ShowNoWlan();
+    //ShowEntryInfo(String("Test"),String("Testmsg..\n1234..."));
+    menu.SetMsg("Verbunden");
   }else{
-    ShowMenu(MAIN_MENU,MAIN_MENU_SIZE);
+    //ShowMenu(MAIN_MENU,MAIN_MENU_SIZE);
+    menu.SetMsg("Nicht Verbunden");
   }
   delay(100);
 }
@@ -86,6 +83,7 @@ void loop() {
 //   Additional Functions
 //================================================================
 
+/*
 void ButtonPress(){
   if((millis() - ButtonStateTime) > 50){ 
     if( CURSOR_POS >= MENU_SIZE){
@@ -154,4 +152,4 @@ void ShowNoWlan(){
   display.println("");
   display.println("Kein WLAN");
   display.display();
-}
+}/*/
