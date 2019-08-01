@@ -1,7 +1,6 @@
 #include "simplemenu.h"
 
-SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display){
-  display = &_display;
+SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(DynamicJsonDocument(jsonCapacity)){
 }
 
 void SimpleMenu::ShowMsg(String message){
@@ -15,16 +14,7 @@ void SimpleMenu::ShowMsg(String message){
 }
 
 void SimpleMenu::SetData(char* data){
-  DynamicJsonDocument doc(jsonCapacity);
-  deserializeJson(doc, data);
-  jsonRoot = doc.as<JsonObject>();
-
-  String d = doc[1]["label"];
-
-  display->clearDisplay();
-  display->setCursor(0,0);
-  display->println("INFO:"); 
-  display->println(d);  
+  deserializeJson(jsondoc, data);
 }
 
 /*char* SimpleMenu::GetData(){
@@ -70,12 +60,16 @@ void SimpleMenu::SetData(char* data){
 }*/
 
 void SimpleMenu::Redraw(){
-  _ShowList();
+  display->clearDisplay();
+  display->setCursor(0,0);
+  _ShowList(1);
+  display->display();
 }
 
-void SimpleMenu::_ShowList(){
-  for(int i=0;i < maxLines;i++){
-    //display->println(jsonRoot[i]["label"]);  
+void SimpleMenu::_ShowList(int offset){
+  for(int i=offset;i < (maxLines + offset) && i < jsondoc.size();i++){
+    String data = jsondoc[i]["label"];
+    display->println(_GetDescr(data));
   }  
 }
 
@@ -93,4 +87,16 @@ void SimpleMenu::_AddPoint_Int(){
 
 void SimpleMenu::_AddPoint_Selection(){
   
+}
+
+// Übersetzt anzuzeigene Texte ins Deutsche
+String SimpleMenu::_GetDescr(String text){
+#ifdef TRANSLATE_TEXT
+    if(text == "Power")       {return "An/Aus";}
+    if(text == "Brightness")  {return "Helligkeit";}
+    if(text == "Pattern")     {return "Modus";}
+    if(text == "Palette")     {return "Farben";}
+    if(text == "Speed")       {return "Farben";}
+#endif 
+    return text;
 }

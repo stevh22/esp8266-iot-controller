@@ -10,6 +10,7 @@
 
 #define TITLE_COLOR WHITE
 #define TEXT_COLOR  WHITE
+//#define TRANSLATE_TEXT
 
 class SimpleMenu
 {
@@ -26,15 +27,18 @@ private:
     Adafruit_SSD1306 *display=nullptr;
     const int maxLines = 4;
 
-    JsonObject jsonRoot;
     const size_t jsonCapacity =  JSON_ARRAY_SIZE(8) + JSON_ARRAY_SIZE(16) + JSON_ARRAY_SIZE(30) + 
       4*JSON_OBJECT_SIZE(3) + 3*JSON_OBJECT_SIZE(4) + 2*JSON_OBJECT_SIZE(5) + 7*JSON_OBJECT_SIZE(6) + 1480;
+    DynamicJsonDocument jsondoc;
 
-    void _ShowList();
+    void _ShowList(int offset=0);
     void _SetTitle(String title);
     void _AddPoint_Boolean();
     void _AddPoint_Int();
     void _AddPoint_Selection();
+
+    String _GetDescr(String text);
+    String _GetDescr(JsonDocument data);
 };
 
 #endif // SIMPLEMENU_H
