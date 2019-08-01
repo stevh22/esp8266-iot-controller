@@ -14,13 +14,14 @@
 class SimpleMenu
 {
 public:
-    SimpleMenu(Adafruit_SSD1306 _display);
+    SimpleMenu(Adafruit_SSD1306 &_display);
 
     void SetTitle (String title);
-    void SetMsg   (String message);
     void SetData  (String data);
     String GetData();
+    
     void Redraw();
+    void ShowMsg  (String message);
 
 private:
     Adafruit_SSD1306 *display=nullptr;
