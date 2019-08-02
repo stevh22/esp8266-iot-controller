@@ -34,6 +34,7 @@ private:
 
     void _ShowList(int offset=0);
     void _DrawScrollBar(int points=1,int pos=1,int width=10);
+    void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val);
     void _SetTitle(String title);
     void _AddPoint_Boolean();
     void _AddPoint_Int();
