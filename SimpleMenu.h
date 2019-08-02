@@ -10,6 +10,7 @@
 
 #define TITLE_COLOR WHITE
 #define TEXT_COLOR  WHITE
+#define BACK_COLOR  BLACK
 //#define TRANSLATE_TEXT
 
 class SimpleMenu
@@ -32,6 +33,7 @@ private:
     DynamicJsonDocument jsondoc;
 
     void _ShowList(int offset=0);
+    void _DrawScrollBar(int points=1,int pos=1,int width=10);
     void _SetTitle(String title);
     void _AddPoint_Boolean();
     void _AddPoint_Int();

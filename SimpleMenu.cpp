@@ -62,7 +62,8 @@ void SimpleMenu::SetData(char* data){
 void SimpleMenu::Redraw(){
   display->clearDisplay();
   display->setCursor(0,0);
-  _ShowList(1);
+  _ShowList();
+  _DrawScrollBar(8,4);
   display->display();
 }
 
@@ -71,6 +72,19 @@ void SimpleMenu::_ShowList(int offset){
     String data = jsondoc[i]["label"];
     display->println(_GetDescr(data));
   }  
+}
+
+void SimpleMenu::_DrawScrollBar(int points,int pos,int bar_width){
+    if(pos < 0){pos = 1;}
+    if(pos > points){pos = points;}
+    if(bar_width < 1){bar_width = 1;}
+    
+    int pointer_height = (display->height()/points);
+    int pointer_pos = pointer_height*(pos-1);
+
+    display->fillRect(display->width()-bar_width-1, 0, bar_width, display->height(), TEXT_COLOR);
+    display->fillRect(display->width()-bar_width, 1,  (bar_width-2), display->height()-2, BACK_COLOR);
+    display->fillRect(display->width()-bar_width, pointer_pos, (bar_width-2), pointer_height, TEXT_COLOR);
 }
 
 void SimpleMenu::_SetTitle(String title){
@@ -96,7 +110,7 @@ String SimpleMenu::_GetDescr(String text){
     if(text == "Brightness")  {return "Helligkeit";}
     if(text == "Pattern")     {return "Modus";}
     if(text == "Palette")     {return "Farben";}
-    if(text == "Speed")       {return "Farben";}
+    if(text == "Speed")       {return "Geschw.";}
 #endif 
     return text;
 }
