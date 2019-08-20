@@ -6,11 +6,16 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Fonts/FreeSans9pt7b.h>
 #include <ArduinoJson.h>
 
 #define TITLE_COLOR WHITE
 #define TEXT_COLOR  WHITE
-#define TEXT_SIZE   2
+#define TEXT_SIZE   1
+#define MENU_TEXT_COLOR  WHITE
+#define MENU_HIGHLIGHT_COLOR     BLACK
+#define MENU_HIGHLIGHT_BACKCOLOR WHITE
+#define MENU_TEXT_SIZE   1.5
 #define BACK_COLOR  BLACK
 //#define TRANSLATE_TEXT
 
@@ -24,16 +29,19 @@ public:
     bool isMenuShown();
     bool isMsgShown();
     bool isOptionShown();
+
     void NextMenuPos();
     void PrevMenuPos();
+    void SelectMenuPos();
     void SetMenuPos(int pos=1);
     
     void Redraw();
+    void ShowMenu();
     void ShowMsg(String message);
 
 private:
     Adafruit_SSD1306 *display=nullptr;
-    const int maxLines = 4;
+    const int maxLines = 3;
 
     const size_t jsonCapacity =  JSON_ARRAY_SIZE(8) + JSON_ARRAY_SIZE(16) + JSON_ARRAY_SIZE(30) + 
       4*JSON_OBJECT_SIZE(3) + 3*JSON_OBJECT_SIZE(4) + 2*JSON_OBJECT_SIZE(5) + 7*JSON_OBJECT_SIZE(6) + 1480;
@@ -50,11 +58,16 @@ private:
 
     String _GetDescr(String text);
     String _GetDescr(JsonDocument data);
+    int _GetMenuSize(String section="");
     
-    int _menuPos = 0;
-    int _menuMaxPos = 0;
-    bool _menuJumpScrool = true;
+    int _menuPos = 1;
+    int _menuMaxPos = 1;
+    int _menuDataIndex = 0;
+    bool _menuJumpScrool = false;
+    
     bool _menuShown = false;
+    bool _msgShown = false;
+    bool _optionShown = false;
 };
 
 #endif // SIMPLEMENU_H

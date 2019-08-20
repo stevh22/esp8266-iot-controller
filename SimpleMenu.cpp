@@ -1,20 +1,12 @@
 #include "simplemenu.h"
 
 SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(DynamicJsonDocument(jsonCapacity)){
-}
 
-void SimpleMenu::ShowMsg(String message){
-  _ClearDisplay();
-  display->setTextSize(TEXT_SIZE);
-  display->setTextColor(TEXT_COLOR);
-  display->println("");
-  display->println(message);
-  display->display();
 }
 
 void SimpleMenu::SetData(char* data){
   deserializeJson(jsondoc, data);
-  _menuMaxPos = jsondoc.size();
+  _menuMaxPos = _GetMenuSize();
 }
 
 /*char* SimpleMenu::GetData(){
@@ -64,17 +56,17 @@ bool SimpleMenu::isMenuShown(){
 }
 
 bool SimpleMenu::isMsgShown(){
-  return false;  
+  return _msgShown;  
 }
 
 bool SimpleMenu::isOptionShown(){
-  return false;  
+  return _optionShown;  
 }
 
 void SimpleMenu::NextMenuPos(){
-  if(_menuPos = _menuMaxPos){
+  if(_menuPos >= _menuMaxPos){
     if(_menuJumpScrool){
-      _menuPos=0;
+      _menuPos = 1;
     }
   }else{
     _menuPos++;  
@@ -82,13 +74,17 @@ void SimpleMenu::NextMenuPos(){
 }
 
 void SimpleMenu::PrevMenuPos(){
-  if(_menuPos = 1){
+  if(_menuPos <= 1){
     if(_menuJumpScrool){
-      _menuPos=_menuMaxPos;
+      _menuPos = _menuMaxPos;
     }
   }else{
     _menuPos--;  
   }
+}
+
+void SimpleMenu::SelectMenuPos(){
+  
 }
 
 void SimpleMenu::SetMenuPos(int pos){
@@ -99,25 +95,74 @@ void SimpleMenu::SetMenuPos(int pos){
 
 void SimpleMenu::Redraw(){
   _ClearDisplay();
-  _ShowList(_menuPos);
+  _ShowList(_menuPos - 1);
   _DrawScrollBar(_menuMaxPos,_menuPos);
-  _DrawVerticalBar(10,10,40,10,2,5);
+  //_DrawVerticalBar(10,10,40,10,2,5);
   display->display();
+}
+
+void SimpleMenu::ShowMenu(){
+  _ClearDisplay();
+  _ShowList(_menuPos - 1);
+  _DrawScrollBar(_menuMaxPos,_menuPos);
+  _menuShown = true; 
+  display->display();
+}
+
+void SimpleMenu::ShowMsg(String message){
+  _ClearDisplay();
+  display->setCursor(0,15);
+  display->setFont(&FreeSans9pt7b);
+  //display->setTextSize(TEXT_SIZE);
+  display->setTextColor(TEXT_COLOR);
+  display->println("");
+  display->println(message);
+  display->display();
+  _msgShown = true;
 }
 
 void SimpleMenu::_ClearDisplay(){
   display->clearDisplay();
   display->setCursor(0,0);
-
   _menuShown = false;
+  _msgShown = false;
+  _optionShown = false;
 }
 
 void SimpleMenu::_ShowList(int offset){
-  for(int i=offset;i < (maxLines + offset) && i < jsondoc.size();i++){
-    String data = jsondoc[i]["label"];
-    display->println(_GetDescr(data));
-  }
-  _menuShown = true;  
+  display->setFont(&FreeSans9pt7b);
+  display->setCursor(0,15);
+  
+  bool noSub = false;
+  int  soffset = 0;
+  int16_t x1, y1;
+  uint16_t w, h;
+
+  for(int i=0;i < jsondoc.size();i++){
+    // Check if SubSections start
+    if(jsondoc[i]["type"] == "Section"){noSub = true;}
+    
+    // Count SubSection Offset
+    if(noSub and (jsondoc[i]["type"] != "Section")){soffset++;}
+
+    // Print Menu
+    if(i >= offset + soffset  and i < maxLines + offset + soffset){
+      if(!noSub or (jsondoc[i]["type"] == "Section")){
+        String data = jsondoc[i]["label"];
+        if((i - soffset) == offset){
+          display->getTextBounds(_GetDescr(data), display->getCursorX(), display->getCursorY(), &x1, &y1, &w, &h);
+          display->fillRect(x1-2, y1-2, display->width(), h+4, MENU_HIGHLIGHT_BACKCOLOR);
+          display->setTextColor(MENU_HIGHLIGHT_COLOR);
+          display->println(_GetDescr(data));
+
+          _menuDataIndex = i;
+        }else{
+          display->setTextColor(MENU_TEXT_COLOR);
+          display->println(_GetDescr(data));  
+        }
+      }
+    }
+  } 
 }
 
 void SimpleMenu::_DrawScrollBar(int points,int pos,int bar_width){
@@ -175,4 +220,33 @@ String SimpleMenu::_GetDescr(String text){
     if(text == "Speed")       {return "Geschw.";}
 #endif 
     return text;
+}
+
+int SimpleMenu::_GetMenuSize(String section){
+  int menuCount = 0;
+  bool SubSections = false;
+
+  if(section = ""){
+    for(int i=0;i < jsondoc.size();i++){
+      if(jsondoc[i]["type"] == "Section"){
+        SubSections = true;
+        menuCount++;
+      }else{
+        if(!SubSections){
+          menuCount++; 
+        }  
+      }     
+    }
+  }else{
+    for(int i=0;i < jsondoc.size();i++){
+      if((jsondoc[i]["type"] == "Section") and (jsondoc[i]["name"] == section)){
+        SubSections = true;
+        menuCount++;
+      }else if(SubSections){
+        if((jsondoc[i]["type"] == "Section")){break;  }
+        menuCount++; 
+      }  
+    }     
+  }  
+  return menuCount; 
 }
