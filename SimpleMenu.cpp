@@ -6,7 +6,7 @@ SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(D
 void SimpleMenu::ShowMsg(String message){
   display->clearDisplay();
   display->setCursor(0,0);
-  display->setTextSize(2);
+  display->setTextSize(TEXT_SIZE);
   display->setTextColor(TEXT_COLOR);
   display->println("");
   display->println(message);
@@ -15,6 +15,7 @@ void SimpleMenu::ShowMsg(String message){
 
 void SimpleMenu::SetData(char* data){
   deserializeJson(jsondoc, data);
+  _menuMaxPos = jsondoc.size();
 }
 
 /*char* SimpleMenu::GetData(){
@@ -59,11 +60,37 @@ void SimpleMenu::SetData(char* data){
   display.display();
 }*/
 
+void SimpleMenu::NextMenuPos(){
+  if(_menuPos = _menuMaxPos){
+    if(_menuJumpScrool){
+      _menuPos=0;
+    }
+  }else{
+    _menuPos++;  
+  }
+}
+
+void SimpleMenu::PrevMenuPos(){
+  if(_menuPos = 1){
+    if(_menuJumpScrool){
+      _menuPos=_menuMaxPos;
+    }
+  }else{
+    _menuPos--;  
+  }
+}
+
+void SimpleMenu::SetMenuPos(int pos){
+  if(pos < 0){_menuPos=0;}
+  if(pos > _menuMaxPos){_menuPos=_menuMaxPos;}
+  _menuPos=pos;
+}
+
 void SimpleMenu::Redraw(){
   display->clearDisplay();
   display->setCursor(0,0);
-  _ShowList();
-  _DrawScrollBar(8,4);
+  _ShowList(_menuPos);
+  _DrawScrollBar(_menuMaxPos,_menuPos);
   _DrawVerticalBar(10,10,40,10,2,5);
   display->display();
 }

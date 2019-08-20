@@ -36,9 +36,6 @@ String MAIN_MENU[MAIN_MENU_SIZE] = {"Lichtmodi:","Funken","Weiss","Rainbow"};
 Adafruit_SSD1306 m_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 SimpleMenu menu(m_display);
 
-int CURSOR_POS = 1;
-int MENU_SIZE = 0;
-int DISPLAY_OFFSET = 0;
 volatile unsigned long ButtonStateTime = 0;
 
 //================================================================
@@ -86,19 +83,15 @@ void loop() {
 //   Additional Functions
 //================================================================
 
-/*
 void ButtonPress(){
   if((millis() - ButtonStateTime) > 50){ 
-    if( CURSOR_POS >= MENU_SIZE){
-      CURSOR_POS = 1;
-    }else{
-      CURSOR_POS = CURSOR_POS + 1;
-    }
-    DoAction(CURSOR_POS);
+    menu.NextMenuPos();
+    //DoAction(CURSOR_POS);
     ButtonStateTime = millis();
   }
 }
 
+/*
 void DoAction(int ActionID){
   // Set Lamp-Mode
   HTTPClient http;

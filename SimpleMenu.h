@@ -10,6 +10,7 @@
 
 #define TITLE_COLOR WHITE
 #define TEXT_COLOR  WHITE
+#define TEXT_SIZE   2
 #define BACK_COLOR  BLACK
 //#define TRANSLATE_TEXT
 
@@ -20,6 +21,9 @@ public:
 
     void SetData  (char *data);
     //char* GetData();
+    void NextMenuPos();
+    void PrevMenuPos();
+    void SetMenuPos(int pos=1);
     
     void Redraw();
     void ShowMsg  (String message);
@@ -42,6 +46,10 @@ private:
 
     String _GetDescr(String text);
     String _GetDescr(JsonDocument data);
+    
+    int _menuPos = 0;
+    int _menuMaxPos = 0;
+    bool _menuJumpScrool = true;
 };
 
 #endif // SIMPLEMENU_H
