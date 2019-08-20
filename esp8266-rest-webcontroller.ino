@@ -43,7 +43,7 @@ volatile unsigned long RotaryStateTime = 0;
 volatile byte RotaryA = false;
 volatile byte RotaryB = false;
 volatile byte RotaryChange = false;
-
+volatile byte RotaryPressRotate = false;
 volatile long RotaryCount = 0;
 volatile long RotaryBtnCount = 0;
 //================================================================
@@ -79,13 +79,36 @@ void setup() {
   
   char* json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
   menu.SetData(json);
-  menu.Redraw();
+  menu.ShowMenu();
 }
 //================================================================
 //   Loop-Code
 //================================================================
 
 void loop(){
+  if(RotaryChange){
+    if(RotaryBtnCount > 0){
+      //Serial.print("Button Press Detected: ");
+      //Serial.println(RotaryBtnCount);
+      //menu.ShowMsg("BTN Press");
+      menu.SelectMenuPos();
+      menu.Redraw();
+    }else{
+      //Serial.print("Rotary Detected: ");
+      //Serial.println(RotaryCount);
+      if(RotaryCount > 0){
+        menu.NextMenuPos();
+        menu.Redraw();
+      }else if(RotaryCount < 0){
+        menu.PrevMenuPos();
+        menu.Redraw();
+      }
+    }
+    
+    RotaryBtnCount = 0;
+    RotaryCount = 0;
+    RotaryChange = false;
+  }
 }
 
 //================================================================
@@ -95,25 +118,21 @@ void loop(){
 ICACHE_RAM_ATTR void RotaryPress(){
   if((millis() - RotaryBtnStateTime) > ROTARY_BTN_DEBOUNCE){
     if(RotaryBtnStateTime > RotaryStateTime + ROTARY_PRESS_DEBOUNCE){
-      RotaryChange = false;
+      RotaryPressRotate = false;
     }
     
-    if(!RotaryChange){
-      //menu.NextMenuPos();
-      //menu.Redraw();
-      //menu.ShowMsg("BTN1");
+    if(!RotaryPressRotate){
       RotaryBtnCount++;
-      Serial.print("Button Press Detected: ");
-      Serial.println(RotaryBtnCount);
+      RotaryChange = true;
     }
-    
+
     RotaryBtnStateTime = millis(); 
   }
 }
 
 ICACHE_RAM_ATTR void RotarySelect(){
   if((millis() - RotaryStateTime) > ROTARY_DEBOUNCE){ 
-    RotaryChange = true;
+    RotaryPressRotate = true;
 
     if(digitalRead(ROTARY_CLK) != digitalRead(ROTARY_DAT)){
       if(!digitalRead(ROTARY_BTN)){//Rechts
@@ -129,8 +148,7 @@ ICACHE_RAM_ATTR void RotarySelect(){
       }  
     }
     
-    Serial.print("Rotary Detected: ");
-    Serial.println(RotaryCount);
+    RotaryChange = true;
     RotaryStateTime = millis();
   }
 }
