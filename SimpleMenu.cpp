@@ -4,8 +4,7 @@ SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(D
 }
 
 void SimpleMenu::ShowMsg(String message){
-  display->clearDisplay();
-  display->setCursor(0,0);
+  _ClearDisplay();
   display->setTextSize(TEXT_SIZE);
   display->setTextColor(TEXT_COLOR);
   display->println("");
@@ -60,6 +59,18 @@ void SimpleMenu::SetData(char* data){
   display.display();
 }*/
 
+bool SimpleMenu::isMenuShown(){
+  return _menuShown;  
+}
+
+bool SimpleMenu::isMsgShown(){
+  return false;  
+}
+
+bool SimpleMenu::isOptionShown(){
+  return false;  
+}
+
 void SimpleMenu::NextMenuPos(){
   if(_menuPos = _menuMaxPos){
     if(_menuJumpScrool){
@@ -87,19 +98,26 @@ void SimpleMenu::SetMenuPos(int pos){
 }
 
 void SimpleMenu::Redraw(){
-  display->clearDisplay();
-  display->setCursor(0,0);
+  _ClearDisplay();
   _ShowList(_menuPos);
   _DrawScrollBar(_menuMaxPos,_menuPos);
   _DrawVerticalBar(10,10,40,10,2,5);
   display->display();
 }
 
+void SimpleMenu::_ClearDisplay(){
+  display->clearDisplay();
+  display->setCursor(0,0);
+
+  _menuShown = false;
+}
+
 void SimpleMenu::_ShowList(int offset){
   for(int i=offset;i < (maxLines + offset) && i < jsondoc.size();i++){
     String data = jsondoc[i]["label"];
     display->println(_GetDescr(data));
-  }  
+  }
+  _menuShown = true;  
 }
 
 void SimpleMenu::_DrawScrollBar(int points,int pos,int bar_width){

@@ -21,12 +21,15 @@ public:
 
     void SetData  (char *data);
     //char* GetData();
+    bool isMenuShown();
+    bool isMsgShown();
+    bool isOptionShown();
     void NextMenuPos();
     void PrevMenuPos();
     void SetMenuPos(int pos=1);
     
     void Redraw();
-    void ShowMsg  (String message);
+    void ShowMsg(String message);
 
 private:
     Adafruit_SSD1306 *display=nullptr;
@@ -36,6 +39,7 @@ private:
       4*JSON_OBJECT_SIZE(3) + 3*JSON_OBJECT_SIZE(4) + 2*JSON_OBJECT_SIZE(5) + 7*JSON_OBJECT_SIZE(6) + 1480;
     DynamicJsonDocument jsondoc;
 
+    void _ClearDisplay();
     void _ShowList(int offset=0);
     void _DrawScrollBar(int points=1,int pos=1,int width=10);
     void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val);
@@ -50,6 +54,7 @@ private:
     int _menuPos = 0;
     int _menuMaxPos = 0;
     bool _menuJumpScrool = true;
+    bool _menuShown = false;
 };
 
 #endif // SIMPLEMENU_H
