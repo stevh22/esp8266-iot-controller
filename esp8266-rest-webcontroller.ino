@@ -25,32 +25,50 @@
 #define SCREEN_HEIGHT 64        // OLED display height, in pixels
 #define SCREEN_ADDR 0x3C        // OLED i2c-Adresse
 
-#define KEY_BUTTON D3
-#define MENU_FONT_SIZE 2
+#define ROTARY_CLK D5
+#define ROTARY_DAT D6
+#define ROTARY_BTN D7
+#define ROTARY_DEBOUNCE 100
+#define ROTARY_BTN_DEBOUNCE 200
+#define ROTARY_PRESS_DEBOUNCE 50
 
-const int MAIN_MENU_SIZE = 4;
-String MAIN_MENU[MAIN_MENU_SIZE] = {"Lichtmodi:","Funken","Weiss","Rainbow"};
 //================================================================
 //   Global Variables
 //================================================================
 Adafruit_SSD1306 m_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 SimpleMenu menu(m_display);
 
-volatile unsigned long ButtonStateTime = 0;
+volatile unsigned long RotaryBtnStateTime = 0;
+volatile unsigned long RotaryStateTime = 0;
+volatile byte RotaryA = false;
+volatile byte RotaryB = false;
+volatile byte RotaryChange = false;
 
+volatile long RotaryCount = 0;
+volatile long RotaryBtnCount = 0;
 //================================================================
 //   Setup-Code
 //================================================================
 
 void setup() {
+  // for DEBUG
+  Serial.begin(115200);
+  
   // init OLED-Display
   m_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDR); 
   m_display.clearDisplay();
   m_display.display();
 
-  // for Buttons
-  pinMode(KEY_BUTTON, INPUT_PULLUP);
-  //attachInterrupt(KEY_BUTTON, ButtonPress, FALLING);
+  // for Rotary Encoder
+  pinMode(ROTARY_BTN, INPUT);
+  pinMode(ROTARY_CLK, INPUT);
+  pinMode(ROTARY_DAT, INPUT);
+  
+  RotaryA = digitalRead(ROTARY_CLK);
+  RotaryB = digitalRead(ROTARY_DAT);
+  
+  attachInterrupt(digitalPinToInterrupt(ROTARY_BTN), RotaryPress,  RISING);
+  attachInterrupt(digitalPinToInterrupt(ROTARY_CLK), RotarySelect, RISING);
 
   // start Menu
   menu.ShowMsg("Suche Wlan");
@@ -67,27 +85,53 @@ void setup() {
 //   Loop-Code
 //================================================================
 
-void loop() {
-  /*if(WiFi.status() != WL_CONNECTED){
-    //ShowNoWlan();
-    //ShowEntryInfo(String("Test"),String("Testmsg..\n1234..."));
-    menu.ShowMsg("Nicht\nVerbunden");
-  }else{
-    //ShowMenu(MAIN_MENU,MAIN_MENU_SIZE);
-    menu.ShowMsg("Verbunden");
-  }//*/
-  delay(100);
+void loop(){
 }
 
 //================================================================
 //   Additional Functions
 //================================================================
 
-void ButtonPress(){
-  if((millis() - ButtonStateTime) > 50){ 
-    menu.NextMenuPos();
-    //DoAction(CURSOR_POS);
-    ButtonStateTime = millis();
+ICACHE_RAM_ATTR void RotaryPress(){
+  if((millis() - RotaryBtnStateTime) > ROTARY_BTN_DEBOUNCE){
+    if(RotaryBtnStateTime > RotaryStateTime + ROTARY_PRESS_DEBOUNCE){
+      RotaryChange = false;
+    }
+    
+    if(!RotaryChange){
+      //menu.NextMenuPos();
+      //menu.Redraw();
+      //menu.ShowMsg("BTN1");
+      RotaryBtnCount++;
+      Serial.print("Button Press Detected: ");
+      Serial.println(RotaryBtnCount);
+    }
+    
+    RotaryBtnStateTime = millis(); 
+  }
+}
+
+ICACHE_RAM_ATTR void RotarySelect(){
+  if((millis() - RotaryStateTime) > ROTARY_DEBOUNCE){ 
+    RotaryChange = true;
+
+    if(digitalRead(ROTARY_CLK) != digitalRead(ROTARY_DAT)){
+      if(!digitalRead(ROTARY_BTN)){//Rechts
+        RotaryCount++;
+      }else{
+        RotaryCount = RotaryCount + 100;
+      } 
+    }else{
+      if(!digitalRead(ROTARY_BTN)){//Links
+        RotaryCount--;
+      }else{
+        RotaryCount = RotaryCount - 100;
+      }  
+    }
+    
+    Serial.print("Rotary Detected: ");
+    Serial.println(RotaryCount);
+    RotaryStateTime = millis();
   }
 }
 
