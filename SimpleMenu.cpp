@@ -63,6 +63,10 @@ bool SimpleMenu::isOptionShown(){
   return _optionShown;  
 }
 
+bool SimpleMenu::isDataChanged(){
+  return false;  
+}
+
 void SimpleMenu::NextMenuPos(){
   if(_menuPos >= _menuMaxPos){
     if(_menuJumpScrool){
@@ -71,6 +75,7 @@ void SimpleMenu::NextMenuPos(){
   }else{
     _menuPos++;  
   }
+  Redraw();
 }
 
 void SimpleMenu::PrevMenuPos(){
@@ -81,10 +86,21 @@ void SimpleMenu::PrevMenuPos(){
   }else{
     _menuPos--;  
   }
+  Redraw();
+}
+
+void SimpleMenu::OptionLeft(){
+  
+}
+
+void SimpleMenu::OptionRight(){
+  
 }
 
 void SimpleMenu::SelectMenuPos(){
-  
+  _menuShown = false;
+  _optionShown = true;
+  Redraw();
 }
 
 void SimpleMenu::SetMenuPos(int pos){
@@ -94,31 +110,69 @@ void SimpleMenu::SetMenuPos(int pos){
 }
 
 void SimpleMenu::Redraw(){
-  _ClearDisplay();
-  _ShowList(_menuPos - 1);
-  _DrawScrollBar(_menuMaxPos,_menuPos);
-  //_DrawVerticalBar(10,10,40,10,2,5);
-  display->display();
+  if(_menuShown){
+    ShowMenu();
+  }else if(_msgShown){
+    ShowMsg();
+  }else if(_optionShown){
+    _ShowOption(_menuDataIndex);
+  }else if(false){
+    _ClearDisplay();
+    _DrawVerticalBar(10,10,40,10,2,5);
+    display->display();
+  }
 }
 
 void SimpleMenu::ShowMenu(){
   _ClearDisplay();
+  
   _ShowList(_menuPos - 1);
   _DrawScrollBar(_menuMaxPos,_menuPos);
-  _menuShown = true; 
+  
   display->display();
+  _menuShown = true; 
 }
 
 void SimpleMenu::ShowMsg(String message){
   _ClearDisplay();
+  
   display->setCursor(0,15);
   display->setFont(&FreeSans9pt7b);
   //display->setTextSize(TEXT_SIZE);
   display->setTextColor(TEXT_COLOR);
   display->println("");
-  display->println(message);
+  if(message != ""){
+     _lastMsg = message;
+  }
+  display->println(_lastMsg);
+  
   display->display();
   _msgShown = true;
+}
+
+void SimpleMenu::_ShowOption(int option){
+  _ClearDisplay();
+
+  String data = jsondoc[option]["label"];
+  String data_type = jsondoc[option]["type"];
+  _DrawTitle(_GetDescr(data));
+
+  if(data_type == "Boolean")
+    _AddPoint_Boolean();
+  if(data_type == "Number")
+    _AddPoint_Int();
+  if(data_type == "Select")
+    _AddPoint_Selection();
+  if(data_type == "Section"){
+    display->setTextColor(TEXT_COLOR);
+    display->println("Selection!");
+  }
+  display->setTextColor(TEXT_COLOR);
+  display->println(option);
+  _DrawVerticalBar(10,10,40,10,2,5);
+  
+  display->display();
+  _optionShown = true;
 }
 
 void SimpleMenu::_ClearDisplay(){
@@ -194,30 +248,74 @@ void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int m
     display->fillRect(pointer_pos,y0+1,pointer_width,vbar_height-2,TEXT_COLOR);
 }
 
-void SimpleMenu::_SetTitle(String title){
-  
+void SimpleMenu::_DrawTitle(String title){
+    display->setFont(&FreeSans9pt7b);
+    display->setTextColor(TEXT_COLOR);
+    
+    int16_t x1, y1;
+    uint16_t w, h;
+    
+    display->getTextBounds(title, 0, 15, &x1, &y1, &w, &h);
+
+    int title_pos_x = (display->width()-w)/2;
+    int title_pos_y = (y1+h);
+    
+    display->fillRect(0, title_pos_y + 4, display->width(), 2, MENU_HIGHLIGHT_BACKCOLOR);
+    display->setCursor(title_pos_x,title_pos_y);
+    display->println(title);
+    display->setCursor(0,display->getCursorY()+10);
 }
 
 void SimpleMenu::_AddPoint_Boolean(){
-  
+    display->setTextColor(TEXT_COLOR);
+
+    String tText = " / ";
+    int16_t x1, y1 , x2 , y2 , x3 , y3;
+    uint16_t w1, h1 , w2, h2 , w3 , h3;
+    display->getTextBounds(_GetDescr("On") ,  0, display->getCursorY(), &x1, &y1, &w1, &h1);
+    display->getTextBounds(tText           , w1, display->getCursorY(), &x2, &y2, &w2, &h2);
+    display->getTextBounds(_GetDescr("Off"), w2, display->getCursorY(), &x3, &y3, &w3, &h3);
+
+    int text_pos_x = (display->width()-(w1+w2+w3))/2;
+    if(false){
+      display->setTextColor(MENU_HIGHLIGHT_COLOR);
+      display->fillRect( text_pos_x-3, y1-2, w1+6, h1+4, MENU_HIGHLIGHT_BACKCOLOR);
+      display->setCursor(text_pos_x,display->getCursorY());
+      display->print(_GetDescr("On"));
+      display->setTextColor(TEXT_COLOR);
+      display->print(tText);
+      display->println(_GetDescr("Off"));  
+    }else{
+      display->setTextColor(TEXT_COLOR);
+      display->setCursor(text_pos_x,display->getCursorY());
+      display->print(_GetDescr("On"));
+      display->print(tText);
+      display->setTextColor(MENU_HIGHLIGHT_COLOR);
+      display->fillRect( text_pos_x+w1+w2+x3-4, y3-2, w3+6, h3+4, MENU_HIGHLIGHT_BACKCOLOR);
+      display->println(_GetDescr("Off"));
+    }
 }
 
 void SimpleMenu::_AddPoint_Int(){
-  
+    display->setTextColor(TEXT_COLOR);
+    display->println("0 ... 255");
 }
 
 void SimpleMenu::_AddPoint_Selection(){
-  
+    display->setTextColor(TEXT_COLOR);
+    display->println("<- Select1 ->");
 }
 
 // Übersetzt anzuzeigene Texte ins Deutsche
 String SimpleMenu::_GetDescr(String text){
 #ifdef TRANSLATE_TEXT
-    if(text == "Power")       {return "An/Aus";}
+    if(text == "Power")       {return "Strom";}
     if(text == "Brightness")  {return "Helligkeit";}
     if(text == "Pattern")     {return "Modus";}
     if(text == "Palette")     {return "Farben";}
-    if(text == "Speed")       {return "Geschw.";}
+    if(text == "Speed")       {return "Tempo";}
+    if(text == "On")          {return "An";}
+    if(text == "Off")         {return "Aus";}
 #endif 
     return text;
 }

@@ -91,17 +91,27 @@ void loop(){
       //Serial.print("Button Press Detected: ");
       //Serial.println(RotaryBtnCount);
       //menu.ShowMsg("BTN Press");
-      menu.SelectMenuPos();
-      menu.Redraw();
+      
+      if(menu.isMenuShown()){
+        menu.SelectMenuPos();
+      }else{
+        menu.ShowMenu();
+      }
     }else{
       //Serial.print("Rotary Detected: ");
       //Serial.println(RotaryCount);
       if(RotaryCount > 0){
-        menu.NextMenuPos();
-        menu.Redraw();
+        if(menu.isMenuShown()){
+          menu.NextMenuPos();
+        }else if(menu.isOptionShown()){
+          menu.OptionLeft();
+        }
       }else if(RotaryCount < 0){
-        menu.PrevMenuPos();
-        menu.Redraw();
+        if(menu.isMenuShown()){
+          menu.PrevMenuPos();
+        }else if(menu.isOptionShown()){
+          menu.OptionRight();
+        }
       }
     }
     

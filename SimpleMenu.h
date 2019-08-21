@@ -17,28 +17,33 @@
 #define MENU_HIGHLIGHT_BACKCOLOR WHITE
 #define MENU_TEXT_SIZE   1.5
 #define BACK_COLOR  BLACK
-//#define TRANSLATE_TEXT
+#define TRANSLATE_TEXT
 
 class SimpleMenu
 {
 public:
     SimpleMenu(Adafruit_SSD1306 &_display);
 
-    void SetData  (char *data);
+    void SetData(char *data);
     //char* GetData();
+    
     bool isMenuShown();
     bool isMsgShown();
     bool isOptionShown();
+    bool isDataChanged();
 
     void NextMenuPos();
     void PrevMenuPos();
     void SelectMenuPos();
     void SetMenuPos(int pos=1);
+
+    void OptionLeft();
+    void OptionRight();
     
     void Redraw();
     void ShowMenu();
-    void ShowMsg(String message);
-
+    void ShowMsg(String message="");
+    
 private:
     Adafruit_SSD1306 *display=nullptr;
     const int maxLines = 3;
@@ -48,10 +53,11 @@ private:
     DynamicJsonDocument jsondoc;
 
     void _ClearDisplay();
+    void _ShowOption(int option=-1);
     void _ShowList(int offset=0);
     void _DrawScrollBar(int points=1,int pos=1,int width=10);
     void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val);
-    void _SetTitle(String title);
+    void _DrawTitle(String title);
     void _AddPoint_Boolean();
     void _AddPoint_Int();
     void _AddPoint_Selection();
@@ -64,7 +70,8 @@ private:
     int _menuMaxPos = 1;
     int _menuDataIndex = 0;
     bool _menuJumpScrool = false;
-    
+    String _lastMsg="";
+
     bool _menuShown = false;
     bool _msgShown = false;
     bool _optionShown = false;
