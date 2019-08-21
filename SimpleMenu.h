@@ -9,14 +9,15 @@
 #include <Fonts/FreeSans9pt7b.h>
 #include <ArduinoJson.h>
 
-#define TITLE_COLOR WHITE
-#define TEXT_COLOR  WHITE
-#define TEXT_SIZE   1
-#define MENU_TEXT_COLOR  WHITE
-#define MENU_HIGHLIGHT_COLOR     BLACK
-#define MENU_HIGHLIGHT_BACKCOLOR WHITE
-#define MENU_TEXT_SIZE   1.5
-#define BACK_COLOR  BLACK
+#define TITLE_COLOR               WHITE
+#define TEXT_COLOR                WHITE
+#define TEXT_SIZE                 1
+#define MENU_TEXT_COLOR           WHITE
+#define MENU_HIGHLIGHT_COLOR      BLACK
+#define MENU_HIGHLIGHT_BACKCOLOR  WHITE
+#define MENU_TEXT_SIZE            1.5
+#define BACK_COLOR                BLACK
+#define OPTION_STEP_SIZE          25
 #define TRANSLATE_TEXT
 
 class SimpleMenu

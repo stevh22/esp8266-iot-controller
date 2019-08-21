@@ -54,10 +54,17 @@ void SimpleMenu::PrevMenuPos(){
 void SimpleMenu::OptionLeft(){
   switch(_selectedOptionType){
     case opt_Boolean:
-      jsondoc[_selectedOption]["value"] = "0";
+      jsondoc[_selectedOption]["value"] = "255";
       break;
     case opt_Number:
-      //int data = jsondoc[option]["value"];
+      JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
+      int val = root["value"];
+      jsondoc[_selectedOption]["value"] = val - OPTION_STEP_SIZE;
+
+      val = root["value"];
+      if(val < 0){
+        jsondoc[_selectedOption]["value"] = 0;
+      }
       break;
   }
   Redraw(); 
@@ -66,10 +73,17 @@ void SimpleMenu::OptionLeft(){
 void SimpleMenu::OptionRight(){
   switch(_selectedOptionType){
     case opt_Boolean:
-      jsondoc[_selectedOption]["value"] = "255";
+      jsondoc[_selectedOption]["value"] = "0";
       break;
     case opt_Number:
-      //jsondoc[option]["value"];
+      JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
+      int val = root["value"];
+      jsondoc[_selectedOption]["value"] = val + OPTION_STEP_SIZE;
+      
+      val = root["value"];
+      if(val > 255){
+        jsondoc[_selectedOption]["value"] = 255;
+      }
       break;
   }
   Redraw();  
@@ -293,7 +307,9 @@ void SimpleMenu::_AddPoint_Boolean(){
 
 void SimpleMenu::_AddPoint_Int(){
     display->setTextColor(TEXT_COLOR);
-    display->println("0 ... 255");
+    String data = jsondoc[_selectedOption]["value"];
+    display->print("0 ... 255 - ");
+    display->println(data);
 }
 
 void SimpleMenu::_AddPoint_Selection(){
