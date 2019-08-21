@@ -28,7 +28,7 @@
 #define ROTARY_CLK D5
 #define ROTARY_DAT D6
 #define ROTARY_BTN D7
-#define ROTARY_DEBOUNCE 50
+#define ROTARY_DEBOUNCE 150
 #define ROTARY_BTN_DEBOUNCE 200
 #define ROTARY_PRESS_DEBOUNCE 50
 
@@ -64,7 +64,7 @@ void setup() {
   pinMode(ROTARY_DAT, INPUT);
   
   attachInterrupt(digitalPinToInterrupt(ROTARY_BTN), RotaryPress,  RISING);
-  attachInterrupt(digitalPinToInterrupt(ROTARY_CLK), RotarySelect, RISING);
+  attachInterrupt(digitalPinToInterrupt(ROTARY_CLK), RotarySelect, CHANGE);
 
   // start Menu
   menu.ShowMsg("Suche Wlan");
@@ -100,13 +100,13 @@ void loop(){
         if(menu.isMenuShown()){
           menu.NextMenuPos();
         }else if(menu.isOptionShown()){
-          menu.OptionLeft();
+          menu.OptionRight();
         }
       }else if(RotaryCount < 0){
         if(menu.isMenuShown()){
           menu.PrevMenuPos();
         }else if(menu.isOptionShown()){
-          menu.OptionRight();
+          menu.OptionLeft();
         }
       }
     }
@@ -123,7 +123,7 @@ void loop(){
 
 ICACHE_RAM_ATTR void RotaryPress(){
   if((millis() - RotaryBtnStateTime) > ROTARY_BTN_DEBOUNCE){
-    if(RotaryBtnStateTime > RotaryStateTime + ROTARY_PRESS_DEBOUNCE){
+    if((millis() - RotaryStateTime ) > ROTARY_PRESS_DEBOUNCE){
       RotaryPressRotate = false;
     }
     
