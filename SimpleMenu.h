@@ -70,8 +70,13 @@ private:
     int _menuMaxPos = 1;
     int _menuDataIndex = 0;
     bool _menuJumpScrool = false;
+    
     String _lastMsg="";
 
+    enum _optionType { opt_Boolean, opt_Number, opt_Select, opt_Section , opt_None};
+    int _selectedOption = 0;
+    int _selectedOptionType = opt_None;
+  
     bool _menuShown = false;
     bool _msgShown = false;
     bool _optionShown = false;

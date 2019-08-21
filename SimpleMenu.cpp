@@ -90,17 +90,31 @@ void SimpleMenu::PrevMenuPos(){
 }
 
 void SimpleMenu::OptionLeft(){
-  
+  switch(_selectedOptionType){
+    case opt_Boolean:
+      jsondoc[_selectedOption]["value"] = "0";
+      break;
+    case opt_Number:
+      //int data = jsondoc[option]["value"];
+      break;
+  }
+  Redraw(); 
 }
 
 void SimpleMenu::OptionRight(){
-  
+  switch(_selectedOptionType){
+    case opt_Boolean:
+      jsondoc[_selectedOption]["value"] = "255";
+      break;
+    case opt_Number:
+      //jsondoc[option]["value"];
+      break;
+  }
+  Redraw();  
 }
 
 void SimpleMenu::SelectMenuPos(){
-  _menuShown = false;
-  _optionShown = true;
-  Redraw();
+  _ShowOption(_menuDataIndex);
 }
 
 void SimpleMenu::SetMenuPos(int pos){
@@ -115,7 +129,7 @@ void SimpleMenu::Redraw(){
   }else if(_msgShown){
     ShowMsg();
   }else if(_optionShown){
-    _ShowOption(_menuDataIndex);
+    _ShowOption();
   }else if(false){
     _ClearDisplay();
     _DrawVerticalBar(10,10,40,10,2,5);
@@ -153,24 +167,42 @@ void SimpleMenu::ShowMsg(String message){
 void SimpleMenu::_ShowOption(int option){
   _ClearDisplay();
 
-  String data = jsondoc[option]["label"];
-  String data_type = jsondoc[option]["type"];
-  _DrawTitle(_GetDescr(data));
+  if(option < 0){
+    option = _selectedOption;
+  }else{
+    _selectedOption = option;
+    String data_type = jsondoc[option]["type"];
 
-  if(data_type == "Boolean")
-    _AddPoint_Boolean();
-  if(data_type == "Number")
-    _AddPoint_Int();
-  if(data_type == "Select")
-    _AddPoint_Selection();
-  if(data_type == "Section"){
-    display->setTextColor(TEXT_COLOR);
-    display->println("Selection!");
+    if(data_type == "Boolean")
+      _selectedOptionType = opt_Boolean;
+    if(data_type == "Number")
+      _selectedOptionType = opt_Number;
+    if(data_type == "Select")
+      _selectedOptionType = opt_Select;
+    if(data_type == "Section"){
+      _selectedOptionType = opt_Section;
+    }
   }
-  display->setTextColor(TEXT_COLOR);
-  display->println(option);
-  _DrawVerticalBar(10,10,40,10,2,5);
+   
+  String title = jsondoc[option]["label"];
+  _DrawTitle(_GetDescr(title));
   
+  switch(_selectedOptionType){
+    case opt_Boolean:
+      _AddPoint_Boolean();
+      break;
+    case opt_Number:
+      _AddPoint_Int();
+      break;
+    case opt_Select:
+      _AddPoint_Selection();
+      break;
+    case opt_Section:
+      display->setTextColor(TEXT_COLOR);
+      display->println("Section!");
+      break;
+  }
+    
   display->display();
   _optionShown = true;
 }
@@ -269,6 +301,7 @@ void SimpleMenu::_DrawTitle(String title){
 void SimpleMenu::_AddPoint_Boolean(){
     display->setTextColor(TEXT_COLOR);
 
+    String data = jsondoc[_selectedOption]["value"];
     String tText = " / ";
     int16_t x1, y1 , x2 , y2 , x3 , y3;
     uint16_t w1, h1 , w2, h2 , w3 , h3;
@@ -277,7 +310,7 @@ void SimpleMenu::_AddPoint_Boolean(){
     display->getTextBounds(_GetDescr("Off"), w2, display->getCursorY(), &x3, &y3, &w3, &h3);
 
     int text_pos_x = (display->width()-(w1+w2+w3))/2;
-    if(false){
+    if(data.toInt() > 0){
       display->setTextColor(MENU_HIGHLIGHT_COLOR);
       display->fillRect( text_pos_x-3, y1-2, w1+6, h1+4, MENU_HIGHLIGHT_BACKCOLOR);
       display->setCursor(text_pos_x,display->getCursorY());
