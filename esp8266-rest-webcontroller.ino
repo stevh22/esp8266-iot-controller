@@ -28,7 +28,7 @@
 #define ROTARY_CLK D5
 #define ROTARY_DAT D6
 #define ROTARY_BTN D7
-#define ROTARY_DEBOUNCE 100
+#define ROTARY_DEBOUNCE 50
 #define ROTARY_BTN_DEBOUNCE 200
 #define ROTARY_PRESS_DEBOUNCE 50
 
@@ -40,12 +40,11 @@ SimpleMenu menu(m_display);
 
 volatile unsigned long RotaryBtnStateTime = 0;
 volatile unsigned long RotaryStateTime = 0;
-volatile byte RotaryA = false;
-volatile byte RotaryB = false;
 volatile byte RotaryChange = false;
 volatile byte RotaryPressRotate = false;
 volatile long RotaryCount = 0;
 volatile long RotaryBtnCount = 0;
+
 //================================================================
 //   Setup-Code
 //================================================================
@@ -63,9 +62,6 @@ void setup() {
   pinMode(ROTARY_BTN, INPUT);
   pinMode(ROTARY_CLK, INPUT);
   pinMode(ROTARY_DAT, INPUT);
-  
-  RotaryA = digitalRead(ROTARY_CLK);
-  RotaryB = digitalRead(ROTARY_DAT);
   
   attachInterrupt(digitalPinToInterrupt(ROTARY_BTN), RotaryPress,  RISING);
   attachInterrupt(digitalPinToInterrupt(ROTARY_CLK), RotarySelect, RISING);
