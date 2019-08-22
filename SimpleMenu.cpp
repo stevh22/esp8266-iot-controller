@@ -10,12 +10,6 @@ void SimpleMenu::SetData(char* data){
 }
 
 void SimpleMenu::GetData(Stream &output){
-  /*for(int i=jsondoc.size()-1;i >= 0;i--){
-    String data_type = jsondoc[i]["type"];
-    if(data_type == SIMPLEMENU_TAG){
-      jsondoc.remove(i);  
-    }  
-  }*/
   serializeJson(jsondoc, output);
   _dataChanged = false;
 }
@@ -42,8 +36,8 @@ void SimpleMenu::NextMenuPos(){
     min_Pos = 1;
     max_Pos = _menuMaxPos;
   }else{
-    min_Pos = _selectedSection + _menuDataOffset + 2;
-    max_Pos = _selectedSection + _menuDataOffset + _GetMenuSize(_selectedSection) + 1; 
+    min_Pos = _selectedSection - _menuDataOffset;
+    max_Pos = _selectedSection - _menuDataOffset + _GetMenuSize(_selectedSection) -1; 
   }
   
   if(_menuPos >= max_Pos){
@@ -62,8 +56,8 @@ void SimpleMenu::PrevMenuPos(){
     min_Pos = 1;
     max_Pos = _menuMaxPos;
   }else{
-    min_Pos = _selectedSection + _menuDataOffset + 2;
-    max_Pos = _selectedSection + _menuDataOffset + _GetMenuSize(_selectedSection) + 1; 
+    min_Pos = _selectedSection - _menuDataOffset;
+    max_Pos = _selectedSection - _menuDataOffset + _GetMenuSize(_selectedSection) -1; 
   }
   
   if(_menuPos <= min_Pos){
@@ -82,8 +76,8 @@ void SimpleMenu::SetMenuPos(int pos){
     min_Pos = 1;
     max_Pos = _menuMaxPos;
   }else{
-    min_Pos = _selectedSection + _menuDataOffset + 2;
-    max_Pos = _selectedSection + _menuDataOffset + _GetMenuSize(_selectedSection) + 1; 
+    min_Pos = _selectedSection - _menuDataOffset;
+    max_Pos = _selectedSection - _menuDataOffset + _GetMenuSize(_selectedSection) -1; 
   }
   
   if(pos < min_Pos){_menuPos=min_Pos;}
@@ -357,7 +351,7 @@ void SimpleMenu::_ShowList(int offset,int section){
           }
         }
       }
-    }    
+    }   
   }
 }
 
