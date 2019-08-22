@@ -1,16 +1,20 @@
 #include "simplemenu.h"
 
-SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(DynamicJsonDocument(jsonCapacity)){
-
+SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(DynamicJsonDocument(jsonCapacity)){ 
 }
 
-void SimpleMenu::SetData(char* data){
+void SimpleMenu::SetData(const String data){
   deserializeJson(jsondoc, data);
   _menuMaxPos = _GetMenuSize();
 }
 
 void SimpleMenu::GetData(Stream &output){
   serializeJson(jsondoc, output);
+  _dataChanged = false;
+}
+
+void SimpleMenu::GetChangedData(Stream &output){
+  serializeJson(jsonChanges, output);
   _dataChanged = false;
 }
 
@@ -127,7 +131,9 @@ void SimpleMenu::OptionLeft(){
       }
       break;}
   }
+
   Redraw();
+  jsonChanges = jsondoc[_selectedOption];
   _dataChanged = true; 
 }
 
@@ -169,7 +175,9 @@ void SimpleMenu::OptionRight(){
       }
       break;}
   }
+  
   Redraw();  
+  jsonChanges = jsondoc[_selectedOption];
   _dataChanged = true; 
 }
 

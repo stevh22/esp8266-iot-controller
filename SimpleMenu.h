@@ -26,8 +26,9 @@ class SimpleMenu
 public:
     SimpleMenu(Adafruit_SSD1306 &_display);
 
-    void SetData(char *data);
+    void SetData(const String data);
     void GetData(Stream &output);
+    void GetChangedData(Stream &output);
     
     bool isMenuShown();
     bool isMsgShown();
@@ -53,6 +54,7 @@ private:
     const size_t jsonCapacity =  JSON_ARRAY_SIZE(8) + JSON_ARRAY_SIZE(16) + JSON_ARRAY_SIZE(30) + 
       4*JSON_OBJECT_SIZE(3) + 3*JSON_OBJECT_SIZE(4) + 2*JSON_OBJECT_SIZE(5) + 7*JSON_OBJECT_SIZE(6) + 1480;
     DynamicJsonDocument jsondoc;
+    JsonVariant jsonChanges;
 
     void _ClearDisplay();
     void _ShowOption(int option=-1);
