@@ -96,7 +96,7 @@ void SimpleMenu::SelectMenuPos(){
 void SimpleMenu::OptionLeft(){
   switch(_selectedOptionType){
     case opt_Boolean:
-      jsondoc[_selectedOption]["value"] = "255";
+      jsondoc[_selectedOption]["value"] = "1";
       break;
     case opt_Number:{
       JsonObject root = jsondoc[_selectedOption].as<JsonObject>();

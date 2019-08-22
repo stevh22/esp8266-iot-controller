@@ -202,10 +202,9 @@ void SendDataToController(){
   String val_name = jsonDoc["name"].as<String>();
 
   HTTPClient http;   
-  http.begin("esp-079448",80,(String)"/" + val_name); 
-  http.addHeader("Content-Type", "text/plain"); 
-  http.addHeader("value", val);
-  int httpResponseCode = http.POST(""); 
+  http.begin(CONTROLLER_ADRESS,80,(String)"/" + val_name); 
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  int httpResponseCode = http.POST((String)"value=" + val); 
 
   if(httpResponseCode>0){
     if(httpResponseCode == 200){
@@ -213,12 +212,6 @@ void SendDataToController(){
       if(response != val){
         menu.ShowMsg("Wrong Data");
       }
-
-      Serial.print("HTTP POST to ");
-      Serial.print((String)"/" + val_name);
-      Serial.print(" with Value:" + val);
-      Serial.print(" Response:" + response);
-      Serial.print(" httpResponseCode:" + (String)httpResponseCode);
     }
   }else{
     menu.ShowMsg("POST\nError."); 
