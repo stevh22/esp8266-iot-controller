@@ -120,8 +120,8 @@ void SimpleMenu::OptionLeft(){
       JsonArray options = root["options"].as<JsonArray>();
     
       int val = root["value"];
-      int val_min = 1;
-      int val_max = options.size();
+      int val_min = 0;
+      int val_max = options.size()-1;
 
       jsondoc[_selectedOption]["value"] = val - 1;
 
@@ -164,8 +164,8 @@ void SimpleMenu::OptionRight(){
       JsonArray options = root["options"].as<JsonArray>();
     
       int val = root["value"];
-      int val_min = 1;
-      int val_max = options.size();
+      int val_min = 0;
+      int val_max = options.size()-1;
 
       jsondoc[_selectedOption]["value"] = val + 1;
       
@@ -478,11 +478,11 @@ void SimpleMenu::_AddPoint_Selection(){
     JsonArray options = root["options"].as<JsonArray>();
     
     int val = root["value"];
-    int val_max = options.size();
+    int val_max = options.size()-1;
 
     String text = "";
-    String text_option = options[val-1];
-    if(val > 1){text += "< ";}else{text += "  ";}
+    String text_option = options[val];
+    if(val > 0){text += "< ";}else{text += "  ";}
     text += text_option;
     if(val < val_max){text += " >";}else{text += "  ";}
 
