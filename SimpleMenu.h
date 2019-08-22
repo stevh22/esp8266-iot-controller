@@ -58,7 +58,7 @@ private:
     void _ShowOption(int option=-1);
     void _ShowList(int offset=0,int section=-1);
     void _DrawScrollBar(int points=1,int pos=1,int width=10);
-    void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val);
+    void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int min_val, int max_val);
     void _DrawTitle(String title);
     void _AddPoint_Boolean();
     void _AddPoint_Int();

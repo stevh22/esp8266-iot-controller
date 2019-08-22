@@ -368,7 +368,7 @@ void SimpleMenu::_DrawScrollBar(int points,int pos,int bar_width){
     display->fillRect(display->width()-bar_width, pointer_pos, (bar_width-2), pointer_height, TEXT_COLOR);
 }
 
-void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val){
+void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int min_val, int max_val){
     if(val <= 0){val = 1;}
     if(val > max_val){val = max_val;}
     if(x0 > x1){int tmp_x=x0; x0 = x1; x1=tmp_x;}
@@ -376,12 +376,16 @@ void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int m
 
     int vbar_height = y1-y0;
     int vbar_width =  x1-x0;
-    int pointer_width = (vbar_width/max_val);
+    int pointer_width = (vbar_width/(max_val-min_val));
     int pointer_pos = pointer_width*(val-1);
+    /*if(pointer_width < 10){
+      pointer_width = 10;
+      pointer_pos = (pointer_width*(val/max_val))-pointer_width;
+    };*/
     
     display->fillRect(x0  ,  y0,vbar_width  ,vbar_height  ,TEXT_COLOR);
     display->fillRect(x0+1,y0+1,vbar_width-2,vbar_height-2,BACK_COLOR);
-    display->fillRect(pointer_pos,y0+1,pointer_width,vbar_height-2,TEXT_COLOR);
+    display->fillRect(x0+pointer_pos,y0+1,pointer_width,vbar_height-2,TEXT_COLOR);
 }
 
 void SimpleMenu::_DrawTitle(String title){
@@ -433,12 +437,22 @@ void SimpleMenu::_AddPoint_Boolean(){
     }
 }
 
-void SimpleMenu::_AddPoint_Int(){
+void SimpleMenu::_AddPoint_Int(){   
+    int16_t x1, y1, x2, y2;
+    uint16_t w1, h1, w2, h2;
+    
     display->setTextColor(TEXT_COLOR);
-    String data = jsondoc[_selectedOption]["value"];
-    display->print("0 ... 255 - ");
-    display->println(data);
-    //_DrawVerticalBar(10,10,40,10,2,5);
+    display->getTextBounds(jsondoc[_selectedOption]["value"].as<String>(),  0, display->getCursorY(), &x1, &y1, &w1, &h1);
+    display->getTextBounds(jsondoc[_selectedOption]["max"].as<String>(),  0, display->getCursorY(), &x2, &y2, &w2, &h2);
+    _DrawVerticalBar(2,
+                    display->getCursorY()-10,
+                    display->width()-w2-8,
+                    display->getCursorY(), 
+                    jsondoc[_selectedOption]["value"].as<int>(),
+                    jsondoc[_selectedOption]["min"].as<int>(),
+                    jsondoc[_selectedOption]["max"].as<int>());
+    display->setCursor(display->width()-(w2/2)-(w1/2)-4,display->getCursorY());
+    display->println(jsondoc[_selectedOption]["value"].as<String>());
 }
 
 void SimpleMenu::_AddPoint_Selection(){
