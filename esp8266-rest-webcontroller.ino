@@ -25,6 +25,8 @@
 #define SCREEN_HEIGHT 64        // OLED display height, in pixels
 #define SCREEN_ADDR 0x3C        // OLED i2c-Adresse
 
+#define CONTROLLER_ADRESS       "esp-079448"
+
 #define ROTARY_CLK D5
 #define ROTARY_DAT D6
 #define ROTARY_BTN D7
@@ -72,12 +74,20 @@ void setup() {
   // connect to Wlan
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pwd);
-  
-  char* json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
-  
-  //char* json = "[{\"label\":\"Hauptmenu\",\"type\":\"SimpelMenu\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
-  menu.SetData(json);
-  menu.ShowMenu();
+
+  while (WiFi.status() != WL_CONNECTED){
+    menu.ShowMsg("Suche Wlan.");
+    delay(500);
+    if(WiFi.status() == WL_CONNECTED){break;}
+    menu.ShowMsg("Suche Wlan..");
+    delay(500);
+    if(WiFi.status() == WL_CONNECTED){break;}
+    menu.ShowMsg("Suche Wlan...");
+    delay(500);
+  }
+
+  menu.ShowMsg("Verbunden");
+  GetDataFromController();
 }
 //================================================================
 //   Loop-Code
@@ -94,8 +104,6 @@ void loop(){
         menu.SelectMenuPos();
       }else{
         menu.ShowMenu();
-        //menu.GetData(Serial);
-        //Serial.println("");
       }
     }else{
       //Serial.print("Rotary Detected: ");
@@ -118,6 +126,9 @@ void loop(){
     RotaryBtnCount = 0;
     RotaryCount = 0;
     RotaryChange = false;
+  }
+  if(menu.isDataChanged()){
+      SendDataToController();
   }
 }
 
@@ -163,14 +174,55 @@ ICACHE_RAM_ATTR void RotarySelect(){
   }
 }
 
-/*
-void DoAction(int ActionID){
-  // Set Lamp-Mode
-  HTTPClient http;
-  http.begin("http://192.168.1.12/test.html"); //HTTP
+void GetDataFromController(){
+    HTTPClient http;
+    http.begin(CONTROLLER_ADRESS,80,"/all");
+    int httpCode = http.GET();
 
-  // start connection and send HTTP header
-  int httpCode = http.GET();
+    if(httpCode > 0){
+      menu.SetData(http.getString());
+      menu.ShowMenu();
+    }else{
+      menu.ShowMsg("Keine Lampe\ngefunden."); 
+      
+      //const String json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
+      //const String json = "[{\"label\":\"Hauptmenu\",\"type\":\"SimpelMenu\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
+      //menu.SetData(json);
+      //menu.ShowMenu();
+    }
+    http.end();
+}
+
+void SendDataToController(){
+  const size_t capacity = JSON_ARRAY_SIZE(30) + JSON_OBJECT_SIZE(5) + 540;
+  DynamicJsonDocument jsonDoc(capacity);
+  deserializeJson(jsonDoc, menu.GetChangedData());
+
+  String val = jsonDoc["value"].as<String>();
+  String val_name = jsonDoc["name"].as<String>();
+
+  HTTPClient http;   
+  http.begin("esp-079448",80,(String)"/" + val_name); 
+  http.addHeader("Content-Type", "text/plain"); 
+  http.addHeader("value", val);
+  int httpResponseCode = http.POST(""); 
+
+  if(httpResponseCode>0){
+    if(httpResponseCode == 200){
+      String response = http.getString();
+      if(response != val){
+        menu.ShowMsg("Wrong Data");
+      }
+
+      Serial.print("HTTP POST to ");
+      Serial.print((String)"/" + val_name);
+      Serial.print(" with Value:" + val);
+      Serial.print(" Response:" + response);
+      Serial.print(" httpResponseCode:" + (String)httpResponseCode);
+    }
+  }else{
+    menu.ShowMsg("POST\nError."); 
+  }
   http.end();
-}*/
+}
 

@@ -28,7 +28,7 @@ public:
 
     void SetData(const String data);
     void GetData(Stream &output);
-    void GetChangedData(Stream &output);
+    String GetChangedData();
     
     bool isMenuShown();
     bool isMsgShown();

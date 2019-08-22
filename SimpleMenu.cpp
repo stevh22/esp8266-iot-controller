@@ -13,9 +13,9 @@ void SimpleMenu::GetData(Stream &output){
   _dataChanged = false;
 }
 
-void SimpleMenu::GetChangedData(Stream &output){
-  serializeJson(jsonChanges, output);
+String SimpleMenu::GetChangedData(){
   _dataChanged = false;
+  return jsonChanges.as<String>();
 }
 
 bool SimpleMenu::isMenuShown(){
