@@ -369,7 +369,7 @@ void SimpleMenu::_DrawScrollBar(int points,int pos,int bar_width){
 }
 
 void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int min_val, int max_val){
-    if(val <= 0){val = 1;}
+    if(val < 0){val = 0;}
     if(val > max_val){val = max_val;}
     if(x0 > x1){int tmp_x=x0; x0 = x1; x1=tmp_x;}
     if(y0 > y1){int tmp_y=y0; y0 = y1; y1=tmp_y;}
@@ -377,15 +377,14 @@ void SimpleMenu::_DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int m
     int vbar_height = y1-y0;
     int vbar_width =  x1-x0;
     int pointer_width = (vbar_width/(max_val-min_val));
-    int pointer_pos = pointer_width*(val-1);
-    /*if(pointer_width < 10){
-      pointer_width = 10;
-      pointer_pos = (pointer_width*(val/max_val))-pointer_width;
-    };*/
+    if(pointer_width < 5){
+      pointer_width = 5;
+    };
+    int pointer_pos = map(val, min_val, max_val, x0, x0+vbar_width-pointer_width);
     
     display->fillRect(x0  ,  y0,vbar_width  ,vbar_height  ,TEXT_COLOR);
     display->fillRect(x0+1,y0+1,vbar_width-2,vbar_height-2,BACK_COLOR);
-    display->fillRect(x0+pointer_pos,y0+1,pointer_width,vbar_height-2,TEXT_COLOR);
+    display->fillRect(pointer_pos,y0+1,pointer_width,vbar_height-2,TEXT_COLOR);
 }
 
 void SimpleMenu::_DrawTitle(String title){
