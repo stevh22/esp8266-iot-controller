@@ -184,6 +184,7 @@ void SimpleMenu::Redraw(){
 }
 
 void SimpleMenu::ShowMenu(){
+  if(jsondoc.size() == 0){return;}
   _ClearDisplay();
   
   _ShowList( _menuPos+_menuDataOffset, _selectedSection);
@@ -223,38 +224,40 @@ void SimpleMenu::_ShowOption(int option){
     _selectedOption = option;
     String data_type = jsondoc[option]["type"];
 
-    if(data_type == "Boolean")
+    if(data_type == "Boolean"){
       _selectedOptionType = opt_Boolean;
-    if(data_type == "Number")
+    }else if(data_type == "Number"){
       _selectedOptionType = opt_Number;
-    if(data_type == "Select")
+    }else if(data_type == "Select"){
       _selectedOptionType = opt_Select;
-    if(data_type == "Section"){
+    }else if(data_type == "Section"){
       _selectedOptionType = opt_Submenu;
+    }else{
+      _selectedOptionType = opt_None;
     }
   }
    
   String title = jsondoc[option]["label"];
   switch(_selectedOptionType){
-    case opt_Boolean:
+    case opt_Boolean:{
       _DrawTitle(_GetDescr(title));
       _AddPoint_Boolean();
       display->display();
       _optionShown = true;
-      break;
-    case opt_Number:
+      break;}
+    case opt_Number:{
       _DrawTitle(_GetDescr(title));
       _AddPoint_Int();
       display->display();
       _optionShown = true;
-      break;
-    case opt_Select:
+      break;}
+    case opt_Select:{
       _DrawTitle(_GetDescr(title));
       _AddPoint_Selection();
       display->display();
       _optionShown = true;
-      break;
-    case opt_Submenu:
+      break;}
+    case opt_Submenu:{
       if(_selectedSection < 0){
         _selectedSection = _selectedOption;
         _menuDataOffset = _menuDataIndex - _menuPos;
@@ -266,7 +269,13 @@ void SimpleMenu::_ShowOption(int option){
       _menuShown = true;
       _optionShown = false;
       Redraw();
-      break;
+      break;}
+    default:{
+      _DrawTitle(_GetDescr(title));
+      display->println("not supported");
+      display->display();
+      _optionShown = true;
+      break;}
   }
 }
 
