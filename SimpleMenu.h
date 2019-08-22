@@ -19,6 +19,7 @@
 #define BACK_COLOR                BLACK
 #define OPTION_STEP_SIZE          25
 #define TRANSLATE_TEXT
+#define SIMPLEMENU_TAG            "SimpelMenu"
 
 class SimpleMenu
 {
@@ -26,7 +27,7 @@ public:
     SimpleMenu(Adafruit_SSD1306 &_display);
 
     void SetData(char *data);
-    //char* GetData();
+    void GetData(Stream &output);
     
     bool isMenuShown();
     bool isMsgShown();
@@ -55,7 +56,7 @@ private:
 
     void _ClearDisplay();
     void _ShowOption(int option=-1);
-    void _ShowList(int offset=0);
+    void _ShowList(int offset=0,int section=-1);
     void _DrawScrollBar(int points=1,int pos=1,int width=10);
     void _DrawVerticalBar(int x0, int y0, int x1, int y1, int val, int max_val);
     void _DrawTitle(String title);
@@ -65,22 +66,25 @@ private:
 
     String _GetDescr(String text);
     String _GetDescr(JsonDocument data);
-    int _GetMenuSize(String section="");
+    int _GetMenuSize(int section=-1);
     
     int _menuPos = 1;
     int _menuMaxPos = 1;
     int _menuDataIndex = 0;
+    int _menuDataOffset = -1;
     bool _menuJumpScrool = false;
     
     String _lastMsg="";
 
-    enum _optionType { opt_Boolean, opt_Number, opt_Select, opt_Section , opt_None};
+    enum _optionType { opt_Boolean, opt_Number, opt_Select, opt_Submenu , opt_None};
     int _selectedOption = 0;
+    int _selectedSection = -1;
     int _selectedOptionType = opt_None;
   
     bool _menuShown = false;
     bool _msgShown = false;
     bool _optionShown = false;
+    bool _dataChanged = false;
 };
 
 #endif // SIMPLEMENU_H
