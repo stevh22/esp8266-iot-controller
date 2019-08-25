@@ -211,7 +211,6 @@ void SimpleMenu::ShowMsg(String message){
   
   display->setCursor(0,15);
   display->setFont(&FreeSans9pt7b);
-  //display->setTextSize(TEXT_SIZE);
   display->setTextColor(TEXT_COLOR);
   display->println("");
   if(message != ""){
