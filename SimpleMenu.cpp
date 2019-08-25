@@ -199,7 +199,7 @@ void SimpleMenu::ShowMenu(){
   if(_selectedSection <0){
     _DrawScrollBar( _menuMaxPos, _menuPos);
   }else{
-    _DrawScrollBar( _GetMenuSize(_selectedSection), _menuPos - _selectedSection);
+    _DrawScrollBar( _GetMenuSize(_selectedSection), _menuPos+_menuDataOffset-_selectedSection+1);
   }
   
   display->display();
