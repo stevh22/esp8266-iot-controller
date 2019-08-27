@@ -158,10 +158,12 @@ void loop(){
     RotaryCount = 0;
     RotaryChange = false;
   }
-  
-  if(menu.isDataChanged()){
-      SendDataToController();
-  }
+
+  #ifndef DEBUGFAKEMENU
+    if(menu.isDataChanged()){
+        SendDataToController();
+    }
+  #endif
 }
 
 //================================================================
