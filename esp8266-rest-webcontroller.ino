@@ -35,6 +35,8 @@
 #define ROTARY_PRESS_DEBOUNCE 50
 
 //#define DEBUGSERIAL
+//#define DEBUGFAKEMENU
+
 //================================================================
 //   Global Variables
 //================================================================
@@ -135,6 +137,7 @@ void loop(){
     RotaryCount = 0;
     RotaryChange = false;
   }
+  
   if(menu.isDataChanged()){
       SendDataToController();
   }
@@ -192,11 +195,12 @@ void GetDataFromController(){
       menu.ShowMenu();
     }else{
       menu.ShowMsg("Keine Lampe\ngefunden."); 
-      
-      //const String json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
-      //const String json = "[{\"label\":\"Hauptmenu\",\"type\":\"SimpelMenu\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
-      //menu.SetData(json);
-      //menu.ShowMenu();
+
+      #ifdef DEBUGFAKEMENU
+        const String json = "[{\"name\":\"power\",\"label\":\"Power\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"brightness\",\"label\":\"Brightness\",\"type\":\"Number\",\"value\":255,\"min\":1,\"max\":255},{\"name\":\"pattern\",\"label\":\"Pattern\",\"type\":\"Select\",\"value\":1,\"options\":[\"Pride\",\"Color Waves\",\"Rainbow Twinkles\",\"Snow Twinkles\",\"Cloud Twinkles\",\"Incandescent Twinkles\",\"Retro C9 Twinkles\",\"Red & White Twinkles\",\"Blue & White Twinkles\",\"Red, Green & White Twinkles\",\"Fairy Light Twinkles\",\"Snow 2 Twinkles\",\"Holly Twinkles\",\"Ice Twinkles\",\"Party Twinkles\",\"Forest Twinkles\",\"Lava Twinkles\",\"Fire Twinkles\",\"Cloud 2 Twinkles\",\"Ocean Twinkles\",\"Rainbow\",\"Rainbow With Glitter\",\"Solid Rainbow\",\"Confetti\",\"Sinelon\",\"Beat\",\"Juggle\",\"Fire\",\"Water\",\"Solid Color\"]},{\"name\":\"palette\",\"label\":\"Palette\",\"type\":\"Select\",\"value\":7,\"options\":[\"Rainbow\",\"Rainbow Stripe\",\"Cloud\",\"Lava\",\"Ocean\",\"Forest\",\"Party\",\"Heat\"]},{\"name\":\"speed\",\"label\":\"Speed\",\"type\":\"Number\",\"value\":30,\"min\":1,\"max\":255},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Section\"},{\"name\":\"autoplay\",\"label\":\"Autoplay\",\"type\":\"Boolean\",\"value\":255},{\"name\":\"autoplayDuration\",\"label\":\"Autoplay Duration\",\"type\":\"Number\",\"value\":255,\"min\":0,\"max\":255},{\"name\":\"solidColor\",\"label\":\"Solid Color\",\"type\":\"Section\"},{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"},{\"name\":\"fire\",\"label\":\"Fire & Water\",\"type\":\"Section\"},{\"name\":\"cooling\",\"label\":\"Cooling\",\"type\":\"Number\",\"value\":49,\"min\":0,\"max\":255},{\"name\":\"sparking\",\"label\":\"Sparking\",\"type\":\"Number\",\"value\":60,\"min\":0,\"max\":255},{\"name\":\"twinkles\",\"label\":\"Twinkles\",\"type\":\"Section\"},{\"name\":\"twinkleSpeed\",\"label\":\"Twinkle Speed\",\"type\":\"Number\",\"value\":4,\"min\":0,\"max\":8},{\"name\":\"twinkleDensity\",\"label\":\"Twinkle Density\",\"type\":\"Number\",\"value\":5,\"min\":0,\"max\":8}]";
+        menu.SetData(json);
+        menu.ShowMenu();
+      #endif
     }
     http.end();
 }
