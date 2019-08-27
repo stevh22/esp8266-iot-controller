@@ -34,6 +34,7 @@
 #define ROTARY_BTN_DEBOUNCE 200
 #define ROTARY_PRESS_DEBOUNCE 50
 
+//#define DEBUGSERIAL
 //================================================================
 //   Global Variables
 //================================================================
@@ -53,7 +54,10 @@ volatile long RotaryBtnCount = 0;
 
 void setup() {
   // for DEBUG
+
+#ifdef DEBUGSERIAL
   Serial.begin(115200);
+#endif  
   
   // init OLED-Display
   m_display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDR); 
@@ -96,18 +100,22 @@ void setup() {
 void loop(){
   if(RotaryChange){
     if(RotaryBtnCount > 0){
-      //Serial.print("Button Press Detected: ");
-      //Serial.println(RotaryBtnCount);
-      //menu.ShowMsg("BTN Press");
-      
+      #ifdef DEBUGSERIAL
+        Serial.print("Button Press Detected: ");
+        Serial.println(RotaryBtnCount);
+      #endif
+        
       if(menu.isMenuShown()){
         menu.SelectMenuPos();
       }else{
         menu.ShowMenu();
       }
     }else{
-      //Serial.print("Rotary Detected: ");
-      //Serial.println(RotaryCount);
+      #ifdef DEBUGSERIAL
+        Serial.print("Rotary Detected: ");
+        Serial.println(RotaryCount);
+      #endif
+
       if(RotaryCount > 0){
         if(menu.isMenuShown()){
           menu.NextMenuPos();
