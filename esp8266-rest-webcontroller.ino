@@ -26,6 +26,9 @@
 #define SCREEN_ADDR 0x3C        // OLED i2c-Adresse
 
 #define CONTROLLER_ADRESS       "esp-079448"
+#define POWERSAVE                             // To Disable PowerSave comment this line
+#define POWERSAVE_TIME          30e3          // Time to wait for Powersave (in millsec)
+#define POWERSAVE_STATE_PIN     D0
 
 #define ROTARY_CLK D5
 #define ROTARY_DAT D6
@@ -43,6 +46,9 @@
 Adafruit_SSD1306 m_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 SimpleMenu menu(m_display);
 
+#ifdef POWERSAVE
+volatile unsigned long PowerSaveStateTime = 0;
+#endif 
 volatile unsigned long RotaryBtnStateTime = 0;
 volatile unsigned long RotaryStateTime = 0;
 volatile byte RotaryChange = false;
@@ -55,7 +61,10 @@ volatile long RotaryBtnCount = 0;
 //================================================================
 
 void setup() {
-  // for DEBUG
+#ifdef POWERSAVE
+  pinMode(POWERSAVE_STATE_PIN, OUTPUT);
+  digitalWrite(POWERSAVE_STATE_PIN, HIGH);
+#endif  
 
 #ifdef DEBUGSERIAL
   Serial.begin(115200);
@@ -100,7 +109,19 @@ void setup() {
 //================================================================
 
 void loop(){
+  #ifdef POWERSAVE
+    if(millis() > PowerSaveStateTime + POWERSAVE_TIME){
+      m_display.clearDisplay();
+      m_display.display();
+      ESP.deepSleep(5e5);  
+    }
+  #endif 
+  
   if(RotaryChange){
+    #ifdef POWERSAVE
+      PowerSaveStateTime = millis();
+    #endif 
+    
     if(RotaryBtnCount > 0){
       #ifdef DEBUGSERIAL
         Serial.print("Button Press Detected: ");
