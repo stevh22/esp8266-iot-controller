@@ -30,6 +30,13 @@ bool SimpleMenu::isOptionShown(){
   return _optionShown;  
 }
 
+bool SimpleMenu::isColorShown(){
+  if(_optionShown && (_selectedOptionType == opt_Color)){
+    return true;
+  }
+  return false;   
+}
+
 bool SimpleMenu::isDataChanged(){
   return _dataChanged;  
 }
@@ -93,11 +100,32 @@ void SimpleMenu::SelectMenuPos(){
   _ShowOption(_menuDataIndex);
 }
 
+void SimpleMenu::SelectColor(){
+  if(_optionColorSelection <= 0){ //ColorMixer
+    if(_optionColorCursor >= opt_ColorCursor_R && _optionColorCursor < opt_ColorCursor_OK){
+      if(!_optionColorCursorSelection){
+        _optionColorCursorSelection = true;  
+      }else{
+        _optionColorCursorSelection = false;  
+      }
+      Redraw();
+    }else if(_optionColorCursor == opt_ColorCursor_OK){
+      ShowMsg("Color selected");
+      //jsonChanges = jsondoc[_selectedOption];
+      //_dataChanged = true; 
+      //ShowMenu();  
+    }
+  }
+}
+
 void SimpleMenu::OptionLeft(){
   switch(_selectedOptionType){
-    case opt_Boolean:
+    case opt_Boolean:{
       jsondoc[_selectedOption]["value"] = "1";
-      break;
+      
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
+      break;}
     case opt_Number:{
       JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
       int val = root["value"];
@@ -114,6 +142,9 @@ void SimpleMenu::OptionLeft(){
       if(val < val_min){
         jsondoc[_selectedOption]["value"] = val_min;
       }
+
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
       break;}
     case opt_Select:{
       JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
@@ -129,19 +160,35 @@ void SimpleMenu::OptionLeft(){
       if(val < val_min){
         jsondoc[_selectedOption]["value"] = val_min;
       }
+
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
+      break;}
+    case opt_Color:{
+      if(_optionColorSelection <= 0){ //ColorMixer
+        if(!_optionColorCursorSelection){
+          _optionColorCursor--;
+          if(_optionColorCursor < 0){_optionColorCursor = 0;}  
+        }else{
+          
+        }
+      }else{  //ColorMixer Selection
+        
+      }
       break;}
   }
 
   Redraw();
-  jsonChanges = jsondoc[_selectedOption];
-  _dataChanged = true; 
 }
 
 void SimpleMenu::OptionRight(){
   switch(_selectedOptionType){
-    case opt_Boolean:
+    case opt_Boolean:{
       jsondoc[_selectedOption]["value"] = "0";
-      break;
+      
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
+      break;}
     case opt_Number:{
       JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
       int val = root["value"];
@@ -158,6 +205,9 @@ void SimpleMenu::OptionRight(){
       if(val > val_max){
         jsondoc[_selectedOption]["value"] = val_max;
       }
+      
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
       break;}
     case opt_Select:{
       JsonObject root = jsondoc[_selectedOption].as<JsonObject>();
@@ -173,12 +223,25 @@ void SimpleMenu::OptionRight(){
       if(val > val_max){
         jsondoc[_selectedOption]["value"] = val_max;
       }
+      
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true; 
+      break;}
+    case opt_Color:{
+      if(_optionColorSelection <= 0){ //ColorMixer
+        if(!_optionColorCursorSelection){
+          _optionColorCursor++;
+          if(_optionColorCursor > opt_ColorCursor_OK){_optionColorCursor = opt_ColorCursor_OK;}  
+        }else{
+          
+        }
+      }else{  //ColorMixer Selection
+        
+      }
       break;}
   }
   
   Redraw();  
-  jsonChanges = jsondoc[_selectedOption];
-  _dataChanged = true; 
 }
 
 void SimpleMenu::Redraw(){
@@ -240,6 +303,9 @@ void SimpleMenu::_ShowOption(int option){
     }else if(data_type == "Section"){
       _selectedOptionType = opt_Submenu;
     }else if(data_type == "Color"){
+      _optionColorSelection = 0;
+      _optionColorCursor = 0;
+      _optionColorCursorSelection = false;
       _selectedOptionType = opt_Color;
     }else{
       _selectedOptionType = opt_None;
@@ -281,9 +347,12 @@ void SimpleMenu::_ShowOption(int option){
       break;}
 
     case opt_Color:{
-      _DrawTitle(_GetDescr(title));
-      _AddPoint_ColorMixer();
-      //_AddPoint_ColorSelection();
+      if(_optionColorSelection <= 0){
+        _AddPoint_ColorMixer();
+      }else{
+        _DrawTitle(_GetDescr(title));
+        _AddPoint_ColorSelection();
+      }
       display->display();
       _optionShown = true;
       break;}
@@ -502,13 +571,66 @@ void SimpleMenu::_AddPoint_Selection(){
 }
 
 void SimpleMenu::_AddPoint_ColorMixer(){
-    //{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"}
-    display->println("new");
+    display->setFont(&FreeSans9pt7b);
+
+    String col_txt[] = {"R","G","B"};
+    int16_t col_pos_x[3];
+    int16_t col_pos_y[3];
+    uint16_t col_width[3];
+    uint16_t col_height[3];
+
+    int16_t  x1, y1;
+    uint16_t w1, h1;
+    display->getTextBounds( "OK", 0, 0, &x1, &y1, &w1, &h1);
+
+    int txt_offset_y = 20;
+    int col_offset_y = 33;
+    for(int col=0; col <= opt_ColorCursor_B; col++){
+      display->getTextBounds( col_txt[col], 2, 0, &col_pos_x[col], &col_pos_y[col], &col_width[col], &col_height[col]);
+      col_pos_y[col] = (col*((display->height()-col_offset_y)+txt_offset_y)/3)-col_height[col]+col_offset_y;
+      
+      if(_optionColorCursor == col && !_optionColorCursorSelection){
+        display->fillRect(  col_pos_x[col]-2, col_pos_y[col]-col_height[col]-2, col_width[col]+4, col_height[col]+4, MENU_HIGHLIGHT_BACKCOLOR);
+        display->setTextColor(MENU_HIGHLIGHT_COLOR);
+        display->setCursor( col_pos_x[col], col_pos_y[col]);
+      }else{
+        display->setTextColor(MENU_TEXT_COLOR);
+        display->setCursor( col_pos_x[col], col_pos_y[col]); 
+      }
+      display->println(col_txt[col]); 
+      
+      _DrawVerticalBar( 20,
+        col_pos_y[col]-10,
+        display->width()-w1-10,
+        col_pos_y[col], 
+        50, //jsondoc[_selectedOption]["value"].as<int>(),
+        0,
+        255);
+      if(_optionColorCursor == col && _optionColorCursorSelection){
+        display->drawRect(18,
+                          col_pos_y[col]-12,
+                          display->width()-w1-26,
+                          col_pos_y[col]-6, 
+                          MENU_HIGHLIGHT_BACKCOLOR);
+      }
+    }
+
+    int txt_ok_pos_x = display->width()-w1-4;
+    int txt_ok_pos_y = (display->height()/2)-h1+txt_offset_y-2;
+    if(_optionColorCursor == opt_ColorCursor_OK){
+      display->fillRect( txt_ok_pos_x-2, txt_ok_pos_y-h1-2, w1+4, h1+4, MENU_HIGHLIGHT_BACKCOLOR);
+      display->setTextColor(MENU_HIGHLIGHT_COLOR);
+      display->setCursor( txt_ok_pos_x, txt_ok_pos_y);
+    }else{
+      display->setTextColor(MENU_TEXT_COLOR);
+      display->setCursor( txt_ok_pos_x, txt_ok_pos_y);
+    }
+    display->println("OK");  
 }
 
 void SimpleMenu::_AddPoint_ColorSelection(){
     //{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"}
-    display->println("new");
+    display->println("color Selection");
 }
 
 // Übersetzt anzuzeigene Texte ins Deutsche

@@ -130,6 +130,8 @@ void loop(){
         
       if(menu.isMenuShown()){
         menu.SelectMenuPos();
+      }else if(menu.isColorShown()){
+        menu.SelectColor();
       }else{
         menu.ShowMenu();
       }

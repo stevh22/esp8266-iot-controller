@@ -30,11 +30,13 @@ public:
     bool isMenuShown();
     bool isMsgShown();
     bool isOptionShown();
+    bool isColorShown();
     bool isDataChanged();
 
     void NextMenuPos();
     void PrevMenuPos();
     void SelectMenuPos();
+    void SelectColor();
     void SetMenuPos(int pos=1);
 
     void OptionLeft();
@@ -81,6 +83,11 @@ private:
     int _selectedOption = 0;
     int _selectedSection = -1;
     int _selectedOptionType = opt_None;
+
+    int  _optionColorSelection = 0;
+    int  _optionColorCursor = 0;
+    bool _optionColorCursorSelection = false;
+    enum _optionColorCursorType { opt_ColorCursor_R=0, opt_ColorCursor_G=1, opt_ColorCursor_B=2, opt_ColorCursor_OK=3};
   
     bool _menuShown = false;
     bool _msgShown = false;
