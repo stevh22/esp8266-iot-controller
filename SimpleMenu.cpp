@@ -434,7 +434,6 @@ void SimpleMenu::_DrawTitle(String title){
 void SimpleMenu::_AddPoint_Boolean(){
     display->setTextColor(TEXT_COLOR);
 
-    String data = jsondoc[_selectedOption]["value"];
     String tText = " / ";
     int16_t x1, y1 , x2 , y2 , x3 , y3;
     uint16_t w1, h1 , w2, h2 , w3 , h3;
@@ -443,7 +442,7 @@ void SimpleMenu::_AddPoint_Boolean(){
     display->getTextBounds(_GetDescr("Off"), w2, display->getCursorY(), &x3, &y3, &w3, &h3);
 
     int text_pos_x = (display->width()-(w1+w2+w3))/2;
-    if(data.toInt() > 0){
+    if(jsondoc[_selectedOption]["value"].as<int>() > 0){
       display->setTextColor(MENU_HIGHLIGHT_COLOR);
       display->fillRect( text_pos_x-3, y1-2, w1+6, h1+4, MENU_HIGHLIGHT_BACKCOLOR);
       display->setCursor(text_pos_x,display->getCursorY());
