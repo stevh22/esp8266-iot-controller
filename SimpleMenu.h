@@ -62,6 +62,8 @@ private:
     void _AddPoint_Boolean();
     void _AddPoint_Int();
     void _AddPoint_Selection();
+    void _AddPoint_ColorMixer();
+    void _AddPoint_ColorSelection();
 
     String _GetDescr(String text);
     String _GetDescr(JsonDocument data);
@@ -75,7 +77,7 @@ private:
     
     String _lastMsg="";
 
-    enum _optionType { opt_Boolean, opt_Number, opt_Select, opt_Submenu , opt_None};
+    enum _optionType { opt_Boolean, opt_Number, opt_Select, opt_Submenu, opt_Color , opt_None};
     int _selectedOption = 0;
     int _selectedSection = -1;
     int _selectedOptionType = opt_None;

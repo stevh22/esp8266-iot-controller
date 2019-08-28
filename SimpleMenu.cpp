@@ -239,6 +239,8 @@ void SimpleMenu::_ShowOption(int option){
       _selectedOptionType = opt_Select;
     }else if(data_type == "Section"){
       _selectedOptionType = opt_Submenu;
+    }else if(data_type == "Color"){
+      _selectedOptionType = opt_Color;
     }else{
       _selectedOptionType = opt_None;
     }
@@ -276,6 +278,14 @@ void SimpleMenu::_ShowOption(int option){
       _menuShown = true;
       _optionShown = false;
       Redraw();
+      break;}
+
+    case opt_Color:{
+      _DrawTitle(_GetDescr(title));
+      _AddPoint_ColorMixer();
+      //_AddPoint_ColorSelection();
+      display->display();
+      _optionShown = true;
       break;}
     default:{
       _DrawTitle(_GetDescr(title));
@@ -490,6 +500,16 @@ void SimpleMenu::_AddPoint_Selection(){
     display->getTextBounds(text ,  0, display->getCursorY(), &x1, &y1, &w1, &h1);
     display->setCursor((display->width()-(w1))/2 ,display->getCursorY());
     display->println(text);
+}
+
+void SimpleMenu::_AddPoint_ColorMixer(){
+    //{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"}
+    display->println("new");
+}
+
+void SimpleMenu::_AddPoint_ColorSelection(){
+    //{\"name\":\"solidColor\",\"label\":\"Color\",\"type\":\"Color\",\"value\":\"255,255,255\"}
+    display->println("new");
 }
 
 // Übersetzt anzuzeigene Texte ins Deutsche
