@@ -110,10 +110,17 @@ void SimpleMenu::SelectColor(){
       }
       Redraw();
     }else if(_optionColorCursor == opt_ColorCursor_OK){
+      // update color
+      String new_color = String(_optionColorMixer[0]) + ',' 
+                       + String(_optionColorMixer[1]) + ','
+                       + String(_optionColorMixer[2]);
+      jsondoc[_selectedOption]["value"] = new_color;
+      Serial.println("Color:" + new_color);
+      jsonChanges = jsondoc[_selectedOption];
+      _dataChanged = true;
+      _optionColorMixerLoaded = false;
+
       ShowMsg("Color selected");
-      //jsonChanges = jsondoc[_selectedOption];
-      //_dataChanged = true; 
-      //ShowMenu();  
     }
   }
 }
@@ -330,18 +337,21 @@ void SimpleMenu::_ShowOption(int option){
       display->display();
       _optionShown = true;
       break;}
+      
     case opt_Number:{
       _DrawTitle(_GetDescr(title));
       _AddPoint_Int();
       display->display();
       _optionShown = true;
       break;}
+      
     case opt_Select:{
       _DrawTitle(_GetDescr(title));
       _AddPoint_Selection();
       display->display();
       _optionShown = true;
       break;}
+      
     case opt_Submenu:{
       if(_selectedSection < 0){
         _selectedSection = _selectedOption;
@@ -358,6 +368,23 @@ void SimpleMenu::_ShowOption(int option){
 
     case opt_Color:{
       if(_optionColorSelection <= 0){
+        if(!_optionColorMixerLoaded){
+          // load color from data
+          String colors = jsondoc[option]["value"].as<String>();
+          Serial.println("Color" + colors);
+          for(int pend,pos=0; pos < 3; pos++){
+            pend = colors.indexOf(',');
+            if(pend < 0){
+              _optionColorMixer[pos] = colors.toInt();
+            }else{
+              _optionColorMixer[pos] = colors.substring(0,pend).toInt();
+              colors = colors.substring(pend+1); 
+            }
+          }
+          _optionColorMixerLoaded = true;
+        }
+
+        // show colormixer
         _AddPoint_ColorMixer();
       }else{
         _DrawTitle(_GetDescr(title));
@@ -366,6 +393,7 @@ void SimpleMenu::_ShowOption(int option){
       display->display();
       _optionShown = true;
       break;}
+      
     default:{
       _DrawTitle(_GetDescr(title));
       display->println("not supported");

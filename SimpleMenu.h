@@ -88,6 +88,7 @@ private:
     int  _optionColorSelection = 0;
     int  _optionColorCursor = 0;
     int  _optionColorMixer[3] = {0,0,0};
+    bool _optionColorMixerLoaded = false;
     const int _optionColorMixerMax = 255;
     bool _optionColorCursorSelection = false;
     enum _optionColorCursorType { opt_ColorCursor_R=0, opt_ColorCursor_G=1, opt_ColorCursor_B=2, opt_ColorCursor_OK=3};
