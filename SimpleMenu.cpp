@@ -1,4 +1,4 @@
-#include "simplemenu.h"
+#include "SimpleMenu.h"
 
 SimpleMenu::SimpleMenu(Adafruit_SSD1306 &_display):display(&_display), jsondoc(DynamicJsonDocument(jsonCapacity)){ 
 }
@@ -168,9 +168,14 @@ void SimpleMenu::OptionLeft(){
       if(_optionColorSelection <= 0){ //ColorMixer
         if(!_optionColorCursorSelection){
           _optionColorCursor--;
-          if(_optionColorCursor < 0){_optionColorCursor = 0;}  
+          if(_optionColorCursor < 0){
+            _optionColorCursor = 0;
+          }  
         }else{
-          
+          _optionColorMixer[_optionColorCursor] -= COLORMIXER_STEP_SIZE;
+          if(_optionColorMixer[_optionColorCursor] < 0){
+            _optionColorMixer[_optionColorCursor] = 0;
+          }
         }
       }else{  //ColorMixer Selection
         
@@ -231,9 +236,14 @@ void SimpleMenu::OptionRight(){
       if(_optionColorSelection <= 0){ //ColorMixer
         if(!_optionColorCursorSelection){
           _optionColorCursor++;
-          if(_optionColorCursor > opt_ColorCursor_OK){_optionColorCursor = opt_ColorCursor_OK;}  
+          if(_optionColorCursor > opt_ColorCursor_OK){
+            _optionColorCursor = opt_ColorCursor_OK;
+          }  
         }else{
-          
+          _optionColorMixer[_optionColorCursor] += COLORMIXER_STEP_SIZE;
+          if(_optionColorMixer[_optionColorCursor] > _optionColorMixerMax){
+            _optionColorMixer[_optionColorCursor] = _optionColorMixerMax;
+          }
         }
       }else{  //ColorMixer Selection
         
@@ -557,17 +567,54 @@ void SimpleMenu::_AddPoint_Selection(){
     int val = root["value"];
     int val_max = options.size()-1;
 
-    String text = "";
+    // format text
     String text_option = options[val];
-    if(val > 0){text += "< ";}else{text += "  ";}
-    text += text_option;
-    if(val < val_max){text += " >";}else{text += "  ";}
+    String text_option_2nd = "";
+    bool bTwoLines = false;
+    if(text_option.length() > 12){
+      String tmp = text_option;
+      tmp.remove(13);
+      int pos = tmp.lastIndexOf(" ");
+      
+      text_option_2nd = text_option.substring(pos+1);
+      text_option.remove(pos);
+      if(text_option_2nd.length() > 12){
+        text_option_2nd.remove(12);
+        text_option_2nd.trim();
+        text_option_2nd += "..";
+      }
+      bTwoLines = true;
+    };
 
+    // draw arrows on the side
+    uint16_t xt, yt, ht=2, wt=4;
+    yt = display->getCursorY()-3;
+    if(val > 0){  //Left
+      xt = display->width()/(wt * 10);
+      display->fillTriangle(xt, yt-ht, xt, yt+ht, xt-wt, yt, TEXT_COLOR);
+    }
+    if(val < val_max){  //Right
+      xt = display->width()-wt;
+      display->fillTriangle(xt, yt-ht, xt, yt+ht, xt+wt, yt, TEXT_COLOR);
+    }
+    
+    // display text
     int16_t x1, y1;
-    uint16_t w1, h1;
-    display->getTextBounds(text ,  0, display->getCursorY(), &x1, &y1, &w1, &h1);
-    display->setCursor((display->width()-(w1))/2 ,display->getCursorY());
-    display->println(text);
+    uint16_t w1, h1; 
+    
+    if(bTwoLines){  // display 2 lines of text
+      display->getTextBounds(text_option , 0, yt, &x1, &y1, &w1, &h1);
+      display->setCursor((display->width()-w1)/2 ,yt-(h1/2));
+      display->println(text_option);
+
+      display->getTextBounds(text_option_2nd , 0, yt, &x1, &y1, &w1, &h1);
+      display->setCursor((display->width()-w1)/2 ,yt+h1);
+      display->println(text_option_2nd);
+    }else{          // display 1 single line of text
+      display->getTextBounds(text_option , 0, yt, &x1, &y1, &w1, &h1);
+      display->setCursor((display->width()-w1)/2 ,yt+(h1/2));
+      display->println(text_option);
+    }
 }
 
 void SimpleMenu::_AddPoint_ColorMixer(){
@@ -585,6 +632,8 @@ void SimpleMenu::_AddPoint_ColorMixer(){
 
     int txt_offset_y = 20;
     int col_offset_y = 33;
+
+    // draw bar for each color
     for(int col=0; col <= opt_ColorCursor_B; col++){
       display->getTextBounds( col_txt[col], 2, 0, &col_pos_x[col], &col_pos_y[col], &col_width[col], &col_height[col]);
       col_pos_y[col] = (col*((display->height()-col_offset_y)+txt_offset_y)/3)-col_height[col]+col_offset_y;
@@ -599,22 +648,15 @@ void SimpleMenu::_AddPoint_ColorMixer(){
       }
       display->println(col_txt[col]); 
       
-      _DrawVerticalBar( 20,
-        col_pos_y[col]-10,
-        display->width()-w1-10,
-        col_pos_y[col], 
-        50, //jsondoc[_selectedOption]["value"].as<int>(),
-        0,
-        255);
+      _DrawVerticalBar( 20, col_pos_y[col]-10,
+        display->width()-w1-10, col_pos_y[col], 
+        _optionColorMixer[col], 0, _optionColorMixerMax);
       if(_optionColorCursor == col && _optionColorCursorSelection){
-        display->drawRect(18,
-                          col_pos_y[col]-12,
-                          display->width()-w1-26,
-                          col_pos_y[col]-6, 
-                          MENU_HIGHLIGHT_BACKCOLOR);
+        display->drawRect(18, col_pos_y[col]-12,display->width()-w1-26,14,MENU_HIGHLIGHT_BACKCOLOR);
       }
     }
 
+    // draw OK button
     int txt_ok_pos_x = display->width()-w1-4;
     int txt_ok_pos_y = (display->height()/2)-h1+txt_offset_y-2;
     if(_optionColorCursor == opt_ColorCursor_OK){

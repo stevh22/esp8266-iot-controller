@@ -16,6 +16,7 @@
 #define MENU_HIGHLIGHT_BACKCOLOR  WHITE
 #define BACK_COLOR                BLACK
 #define OPTION_STEP_SIZE          25
+#define COLORMIXER_STEP_SIZE      12
 #define TRANSLATE_TEXT
 
 class SimpleMenu
@@ -86,6 +87,8 @@ private:
 
     int  _optionColorSelection = 0;
     int  _optionColorCursor = 0;
+    int  _optionColorMixer[3] = {0,0,0};
+    const int _optionColorMixerMax = 255;
     bool _optionColorCursorSelection = false;
     enum _optionColorCursorType { opt_ColorCursor_R=0, opt_ColorCursor_G=1, opt_ColorCursor_B=2, opt_ColorCursor_OK=3};
   
